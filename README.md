@@ -55,4 +55,3 @@ A API está configurada para se conectar a uma instância remota do PostgreSQL. 
 
 ## 4. Testes
 Todas as rotas foram exaustivamente testadas via Postman, validando tanto os casos de sucesso (200 OK / 201 Created) quanto o tratamento de erros de integridade (400 Bad Request), garantindo que a lógica de negócio está alinhada à modelagem de dados.
-"""
