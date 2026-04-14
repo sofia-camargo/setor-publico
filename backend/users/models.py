@@ -1,21 +1,20 @@
 from django.db import models
+# 1. Aqui: Importando com S maiúsculo!
+from sector.models import Sector 
 
-class sector(models.Model):
-    name = models.CharField(max_length=100)
-    acronym = models.CharField(max_length=10)
+class Users(models.Model):
+    id_usuario = models.AutoField(primary_key=True)
+    nome = models.CharField(max_length=255)
+    funcao = models.CharField(max_length=255, null=True, blank=True)
+    matricula = models.IntegerField(null=True, blank=True)
+
+    id_setor = models.ForeignKey(
+        'sector.Sector', 
+        on_delete=models.CASCADE, 
+        db_column='id_setor'  
+    )
     
-    def __str__(self):
-        return self.name
 
-
-class users(models.Model):
-    name = models.CharField(max_length=100)
-    user_function = models.CharField(max_length=100)
-
-    sector = models.ForeignKey(sector, on_delete=models.CASCADE)
-
-
-    def __str__(self):
-        return self.name
-    
-# Create your models here.
+    class Meta:
+        managed = False
+        db_table = 'usuarios'
