@@ -1,3 +1,4 @@
+![Em Andamento](https://img.shields.io/badge/Status-Em%20Andamento-yellow?style=for-the-badge&logo=github)
 # API GAFIA - Sistema de Gerenciamento de Projetos
 
 Este repositório contém a API REST desenvolvida para a 2ª Fase do Projeto Interdisciplinar. A aplicação foi construída utilizando o framework Django e Django Rest Framework, com persistência de dados em um banco PostgreSQL operando em arquitetura de rede local.
