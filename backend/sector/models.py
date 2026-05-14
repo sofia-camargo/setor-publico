@@ -1,8 +1,10 @@
 from django.db import models
 
 class Sector(models.Model):
-    name = models.CharField(max_length=100)
-    acronym = models.CharField(max_length=10)
+    id_setor = models.AutoField(primary_key=True)
+    nome_setor = models.CharField(max_length=255)
+    sigla = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.name
+    class Meta:
+        managed = False
+        db_table = 'setores'
