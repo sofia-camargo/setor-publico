@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assistente · SIGDEI</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body { background: #f3f6fa; color: #163b59; font-family: system-ui, sans-serif; }
+    .assistant-page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
+    .assistant-heading { margin-bottom: 20px; }
+    .assistant-heading h1 { margin: 0 0 8px; font-size: 28px; }
+    .assistant-heading p { margin: 0; line-height: 1.5; }
+    .assistant-status { display: block; margin: 16px 0; padding: 12px 14px; color: #31566f; background: #eaf2f7; border-radius: 9px; font-size: 14px; }
+    .assistant-messages { display: grid; gap: 14px; min-height: 180px; margin: 18px 0; }
+    .assistant-message { padding: 17px; background: #fff; border: 1px solid #d7e1e9; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .assistant-message.user { margin-left: 10%; background: #e4f3ee; }
+    .assistant-message strong { display: block; color: #0c776b; font-size: 12px; margin-bottom: 8px; }
+    .assistant-sources { border-top: 1px solid #d7e1e9; margin-top: 13px; padding-top: 9px; font-size: 13px; color: #45637a; }
+    .assistant-form { padding: 18px; background: #fff; border: 1px solid #d7e1e9; border-radius: 12px; }
+    .assistant-form label { display: block; font-weight: 700; margin-bottom: 9px; }
+    .assistant-form textarea { width: 100%; min-height: 90px; padding: 12px; border: 1px solid #b6c9d6; border-radius: 8px; font: inherit; resize: vertical; }
+    .assistant-form button { display: block; margin: 12px 0 0 auto; padding: 10px 20px; border: 0; border-radius: 8px; color: white; background: #0c776b; font: inherit; font-weight: 700; cursor: pointer; }
+    .assistant-form button:disabled { opacity: .55; cursor: wait; }
+    .assistant-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; }
+    .assistant-controls label { margin: 0; }
+    .assistant-controls select, .assistant-controls input { display: block; margin-top: 5px; padding: 9px; border: 1px solid #b6c9d6; border-radius: 8px; font: inherit; }
+    .assistant-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .assistant-badge { padding: 6px 10px; border-radius: 999px; color: #31566f; background: #eaf2f7; font-size: 13px; }
+    [hidden] { display: none !important; }
+  </style>
+  <script src="assets/js/assistente.js" defer></script>
+</head>
+<body>
+  <main class="assistant-page">
+    <div class="assistant-heading">
+      <h1>Assistente RAG</h1>
+      <p>Faça uma pergunta em linguagem natural. A IA recupera automaticamente documentos e dados autorizados do SIGDEI antes de responder.</p>
+      <div class="assistant-badges" aria-label="Fontes consultadas automaticamente">
+        <span class="assistant-badge">Documentos</span>
+        <span class="assistant-badge">Indicadores</span>
+        <span class="assistant-badge">Projetos</span>
+        <span id="assistant-strategic-badge" class="assistant-badge">IC-01 a IC-04</span>
+      </div>
+    </div>
+    <span id="assistant-status" class="assistant-status" role="status">Verificando o RAG local…</span>
+    <section id="assistant-messages" class="assistant-messages" aria-live="polite"></section>
+    <form id="assistant-form" class="assistant-form">
+      <div class="assistant-controls">
+        <label for="assistant-start">Período dos dados — de
+          <input id="assistant-start" type="date" required>
+        </label>
+        <label for="assistant-end">Até
+          <input id="assistant-end" type="date" required>
+        </label>
+      </div>
+      <label for="assistant-question">Sua pergunta</label>
+      <textarea id="assistant-question" maxlength="2000" required placeholder="Ex.: Quantas empresas orientadas pelo SEBRAE chegaram ao crédito?"></textarea>
+      <button id="assistant-send" type="submit">Perguntar</button>
+    </form>
+  </main>
+</body>
+</html>

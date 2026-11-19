@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofícios | Plataforma Inteligente</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS do Modal Ofícios */
+        .oficio-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .oficio-modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .oficio-modal-box {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            border-radius: 16px;
+            width: 90%; max-width: 550px;
+            padding: 2rem;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #ffffff;
+        }
+        .oficio-modal-overlay.active .oficio-modal-box {
+            transform: scale(1) translateY(0);
+        }
+        
+        .oficio-modal-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 1.5rem; padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .oficio-modal-title { font-size: 1.4rem; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+        .oficio-close-btn {
+            background: none; border: none; color: #b9d5e6; font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+        }
+        .oficio-close-btn:hover { color: #ef4444; }
+        
+        .oficio-detail-row { display: flex; flex-direction: column; margin-bottom: 1rem; }
+        .oficio-detail-label { font-size: 0.85rem; color: #b9d5e6; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 0.2rem; }
+        .oficio-detail-value { font-size: 1.05rem; color: #f3f7fa; line-height: 1.5; }
+        .oficio-detail-value.assunto { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary-color); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" style="display: flex; align-items:center; gap: 10px;">
+                <img src="assets/img/logo_prefeitura.png" alt="Logo Prefeitura da Iracemápolis" style="height: 35px; width: auto; object-fit: contain;">
+                <span>SIGDEI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Painel de Controle</a></li>
+                <li><a href="oficios.html" class="nav-link active"><i class="fa-solid fa-file-signature"></i> Ofícios</a></li>
+                <li><a href="projetos.html" class="nav-link"><i class="fa-solid fa-project-diagram"></i> Projetos</a></li>
+                <li><a href="indicadores.html" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Indicadores</a></li>
+                
+                <li id="menu-usuarios" style="display:none;"><a href="usuarios.html" class="nav-link"><i class="fa-solid fa-users"></i> Usuários</a></li>
+                <li><a href="configuracoes.html" class="nav-link"><i class="fa-solid fa-gear"></i> Configurações</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header glass" style="padding: 1rem 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 class="page-title">Gerenciamento de Ofícios</h2>
+                <div class="user-profile">
+                    <div class="user-info" style="text-align: right;">
+                        <h4 id="user-name">Carregando...</h4>
+                        <p id="user-role">Carregando...</p>
+                    </div>
+                    <div id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">-</div>
+                    <a href="#" id="logout-btn" style="color: var(--text-muted); margin-left: 1rem;" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+            </header>
+
+            <div id="alert-box" class="alert alert-success" style="display:none;">Ofício registrado com sucesso! Número gerado automaticamente.</div>
+
+            <div class="glass" style="padding: 2rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">Novo Ofício</h3>
+                <form id="form-oficio" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                        <label class="form-label" for="assunto">Assunto do Ofício</label>
+                        <input type="text" id="assunto" name="assunto" class="form-control" required style="background: #064a7d;">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label" for="local_fisico">Localização Física (Opcional)</label>
+                        <input type="text" id="local_fisico" name="local_fisico" class="form-control" placeholder="Gaveta, Pasta..." style="background: #064a7d;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: auto;"><i class="fa-solid fa-plus"></i> Registrar</button>
+                </form>
+            </div>
+
+            <!-- Painel de Filtros -->
+            <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; color: #fff;">
+                    <i class="fa-solid fa-filter" style="color: var(--status-yellow);"></i> Filtrar Ofícios
+                </h3>
+                <form id="form-filtro" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; align-items: flex-end;">
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filter_setor" class="form-label" style="font-size: 0.8rem; margin-bottom: 0.25rem; color: #fff;">Setor</label>
+                        <select name="filter_setor" id="filter_setor" class="form-control" style="font-size: 0.9rem; padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                            <option value="">Todos os Setores</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filter_numero" class="form-label" style="font-size: 0.8rem; margin-bottom: 0.25rem; color: #fff;">Número do Ofício</label>
+                        <input type="number" name="filter_numero" id="filter_numero" min="1" class="form-control" placeholder="Ex: 5" style="font-size: 0.9rem; padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-start; margin-bottom: 0;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1; padding: 0.6rem 1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-weight: 500; font-size: 0.875rem; background-color: var(--primary-color);">
+                            <i class="fa-solid fa-magnifying-glass"></i> Filtrar
+                        </button>
+                        <button type="button" onclick="limparFiltro()" class="btn" style="background: rgba(255,255,255,0.15); color: #fff; padding: 0.6rem 1rem; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 0.875rem; border: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                            Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="glass" style="padding: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">Ofícios Registrados</h3>
+                <div class="table-container">
+                    <table class="data-table" id="table-oficios">
+                        <thead>
+                            <tr>
+                                <th>Nº / Ano</th>
+                                <th>Data</th>
+                                <th>Assunto (Resumo)</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal de Detalhes -->
+            <div id="modal-detalhes" class="oficio-modal-overlay" onclick="if(event.target===this) fecharModal()">
+                <div class="oficio-modal-box glass">
+                    <div class="oficio-modal-header">
+                        <h3 id="modal-titulo" class="oficio-modal-title"><i class="fa-solid fa-file-invoice"></i> Detalhes do Ofício</h3>
+                        <button class="oficio-close-btn" onclick="fecharModal()"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    <div id="modal-body">
+                        <!-- Conteúdo será injetado aqui -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('jwt_token');
+        if (!token) window.location.href = 'index.html';
+        const user = JSON.parse(localStorage.getItem('user')) || { nome: '', nivel_acesso: '', id_setor: null };
+        
+        document.getElementById('user-name').textContent = user.nome;
+        document.getElementById('user-role').textContent = user.nivel_acesso;
+        if(user.nome) document.getElementById('user-avatar').textContent = user.nome.charAt(0).toUpperCase();
+
+        if (user.nivel_acesso === 'Administrador' || user.nivel_acesso === 'Gestor') {
+            document.getElementById('menu-usuarios').style.display = 'block';
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+        
+        const apiHeaders = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        let oficiosList = [];
+        let setoresMap = {};
+        let usuariosMap = {};
+
+        function mostrarAlerta(msg, isError=false) {
+            const box = document.getElementById('alert-box');
+            if(!box) return alert(msg);
+            box.textContent = msg;
+            box.className = isError ? 'alert alert-error' : 'alert alert-success';
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 3000);
+        }
+        function formatData(dataStr) {
+            if(!dataStr) return '';
+            const [y, m, d] = dataStr.split('T')[0].split('-');
+            return `${d}/${m}/${y}`;
+        }
+        function strPadLeft(string, pad, length) {
+            return (new Array(length + 1).join(pad) + string).slice(-length);
+        }
+
+        async function init() {
+            try {
+                const [setoresRes, usuariosRes, oficiosRes] = await Promise.all([
+                    fetch(`http://${window.location.hostname}:8000/api/v1/setores/`, { headers: apiHeaders }),
+                    fetch(`http://${window.location.hostname}:8000/api/v1/usuarios/`, { headers: apiHeaders }),
+                    fetch(`http://${window.location.hostname}:8000/api/v1/oficios/`, { headers: apiHeaders })
+                ]);
+                
+                const setores = await setoresRes.json();
+                const usuarios = await usuariosRes.json();
+                let oficios = await oficiosRes.json();
+
+                const selSetor = document.getElementById('filter_setor');
+                setores.forEach(s => {
+                    setoresMap[s.id_setor] = s.nome;
+                    if(user.nivel_acesso === 'Administrador' || s.id_setor === user.id_setor){
+                        selSetor.innerHTML += `<option value="${s.id_setor}">${s.nome}</option>`;
+                    }
+                });
+
+                if(user.nivel_acesso !== 'Administrador') {
+                    selSetor.disabled = true;
+                    selSetor.value = user.id_setor;
+                    selSetor.style.background = 'rgba(15, 23, 42, 0.3)';
+                    selSetor.style.color = 'rgba(255,255,255,0.6)';
+                }
+
+                usuarios.forEach(u => usuariosMap[u.id_usuario] = u.nome);
+
+                oficiosList = oficios;
+                renderTabela();
+            } catch(e) { console.error(e); }
+        }
+
+        function renderTabela() {
+            const tbody = document.querySelector('#table-oficios tbody');
+            tbody.innerHTML = '';
+            
+            let filtro_setor = document.getElementById('filter_setor').value;
+            let filtro_num = document.getElementById('filter_numero').value;
+
+            let filtrados = oficiosList;
+
+            // Restrição de nivel
+            if (user.nivel_acesso !== 'Administrador') {
+                filtrados = filtrados.filter(o => o.id_setor === user.id_setor);
+            } else if (filtro_setor) {
+                filtrados = filtrados.filter(o => o.id_setor.toString() === filtro_setor);
+            }
+
+            if (filtro_num) {
+                filtrados = filtrados.filter(o => o.numero_sequencial.toString() === filtro_num);
+            }
+
+            if(filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum ofício registrado.</td></tr>`;
+                return;
+            }
+
+            filtrados.forEach(o => {
+                const numAno = `${strPadLeft(o.numero_sequencial, '0', 4)}/${o.ano}`;
+                const assuntoResumo = o.assunto.length > 40 ? o.assunto.substring(0, 40) + '...' : o.assunto;
+                
+                // Vamos converter o objeto do ofício para JSON seguro e injetar no botão
+                const objJson = JSON.stringify(o).replace(/"/g, '&quot;');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${numAno}</strong></td>
+                        <td>${formatData(o.data_oficio)}</td>
+                        <td>${assuntoResumo}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-primary" onclick="abrirDetalhes(${objJson})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                <i class="fa-solid fa-eye"></i> Detalhes
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function abrirDetalhes(o) {
+            const numAno = `${strPadLeft(o.numero_sequencial, '0', 4)}/${o.ano}`;
+            const nomeSetor = setoresMap[o.id_setor] || 'Desconhecido';
+            const autor = usuariosMap[o.id_usuario] || 'Desconhecido';
+            
+            document.getElementById('modal-titulo').innerHTML = `Ofício Nº ${numAno}`;
+            document.getElementById('modal-body').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="oficio-detail-row">
+                        <span class="oficio-detail-label">Data de Registro</span>
+                        <span class="oficio-detail-value"><i class="fa-regular fa-calendar" style="color: #8ed1f0;"></i> ${formatData(o.data_oficio)}</span>
+                    </div>
+                    <div class="oficio-detail-row">
+                        <span class="oficio-detail-label">Setor</span>
+                        <span class="oficio-detail-value"><span class="status-tag status-encerrado" style="font-size:0.85rem; padding: 4px 8px;">${nomeSetor}</span></span>
+                    </div>
+                    <div class="oficio-detail-row" style="grid-column: span 2;">
+                        <span class="oficio-detail-label">Autor (Lançamento)</span>
+                        <span class="oficio-detail-value"><i class="fa-regular fa-user" style="color: #b9d5e6;"></i> ${autor}</span>
+                    </div>
+                </div>
+                
+                <div class="oficio-detail-row" style="margin-bottom: 1.5rem;">
+                    <span class="oficio-detail-label">Assunto</span>
+                    <div class="oficio-detail-value assunto">${o.assunto}</div>
+                </div>
+                
+                <div class="oficio-detail-row" style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+                    <span class="oficio-detail-label" style="color: #cbd8e1;"><i class="fa-solid fa-location-dot" style="color: #f87171;"></i> Localização Física</span>
+                    <span class="oficio-detail-value" style="font-weight: 500;">${o.local_fisico || '<span style="color:#657487; font-style:italic;">Não informada</span>'}</span>
+                </div>
+            `;
+            document.getElementById('modal-detalhes').classList.add('active');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-detalhes').classList.remove('active');
+        }
+
+        document.getElementById('form-filtro').addEventListener('submit', (e) => {
+            e.preventDefault();
+            renderTabela();
+        });
+
+        window.limparFiltro = function() {
+            document.getElementById('filter_numero').value = '';
+            if(user.nivel_acesso === 'Administrador') {
+                document.getElementById('filter_setor').value = '';
+            }
+            renderTabela();
+        }
+
+        document.getElementById('form-oficio').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // RF31: usuário e setor são definidos pelo backend a partir do JWT.
+            const body = {
+                assunto: document.getElementById('assunto').value
+            };
+            try {
+                const res = await fetch(`http://${window.location.hostname}:8000/api/v1/oficios/`, { method: 'POST', headers: apiHeaders, body: JSON.stringify(body) });
+                if(res.ok) {
+                    mostrarAlerta('Ofício registrado com sucesso! Número gerado automaticamente.');
+                    setTimeout(() => document.getElementById('alert-box').style.display = 'none', 3000);
+                    e.target.reset();
+                    init();
+                } else {
+                    const data = await res.json();
+                    mostrarAlerta("Erro ao criar ofício: " + JSON.stringify(data), true);
+                }
+            } catch(e) {}
+        });
+
+        init();
+    </script>
+</body>
+</html>

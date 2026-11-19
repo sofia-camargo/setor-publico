@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Usuários | SIGDEI
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+
+    <style>
+
+        .grid-form {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(200px, 1fr)
+                );
+
+            gap: 1rem;
+        }
+
+
+        .form-control {
+            background: #064a7d;
+        }
+
+
+        .modal-overlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0,0,0,0.6);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            z-index: 1000;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transition:
+                opacity 0.3s ease;
+        }
+
+
+        .modal-overlay.active {
+
+            opacity: 1;
+
+            pointer-events: all;
+        }
+
+
+        .modal-box {
+
+            background: #ffffff;
+
+            color: #26364a;
+
+            width: 90%;
+
+            max-width: 420px;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 10px 25px
+                rgba(0,0,0,0.5);
+        }
+
+
+        .modal-header {
+
+            padding: 1.5rem;
+
+            border-bottom:
+                1px solid #dce6ec;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+        }
+
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+
+        .close-btn {
+
+            border: none;
+
+            background: none;
+
+            font-size: 1.5rem;
+
+            cursor: pointer;
+
+            color: #657487;
+        }
+
+
+        .password-help {
+
+            display: block;
+
+            margin-top: 0.4rem;
+
+            color: var(--text-muted);
+
+            font-size: 0.75rem;
+
+            line-height: 1.4;
+        }
+
+
+        .filter-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                2fr 1fr auto auto;
+
+            gap: 1rem;
+
+            align-items: end;
+        }
+
+
+        @media(max-width: 900px) {
+
+            .filter-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app-container">
+
+
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-logo">
+
+        <img
+            src="assets/img/logo_prefeitura.png"
+            alt="Logo Prefeitura"
+            style="height:35px;"
+        >
+
+        <span>
+            SIGDEI
+        </span>
+
+    </div>
+
+
+    <ul class="nav-menu">
+
+        <li>
+            <a
+                href="dashboard.html"
+                class="nav-link"
+            >
+                <i class="fa-solid fa-chart-pie"></i>
+                Painel de Controle
+            </a>
+        </li>
+
+
+        <li>
+            <a
+                href="oficios.html"
+                class="nav-link"
+            >
+                <i class="fa-solid fa-file-signature"></i>
+                Ofícios
+            </a>
+        </li>
+
+
+        <li>
+            <a
+                href="projetos.html"
+                class="nav-link"
+            >
+                <i class="fa-solid fa-project-diagram"></i>
+                Projetos
+            </a>
+        </li>
+
+
+        <li>
+            <a
+                href="indicadores.html"
+                class="nav-link"
+            >
+                <i class="fa-solid fa-chart-bar"></i>
+                Indicadores
+            </a>
+        </li>
+
+
+        <li>
+            <a
+                href="usuarios.html"
+                class="nav-link active"
+            >
+                <i class="fa-solid fa-users"></i>
+                Usuários
+            </a>
+        </li>
+
+
+        <li>
+            <a
+                href="configuracoes.html"
+                class="nav-link"
+            >
+                <i class="fa-solid fa-gear"></i>
+                Configurações
+            </a>
+        </li>
+
+    </ul>
+
+</aside>
+
+
+<!-- =====================================================
+     CONTEÚDO
+====================================================== -->
+
+<main class="main-content">
+
+
+<header
+    class="header glass"
+    style="
+        padding:1rem 2rem;
+        border-radius:12px;
+        margin-bottom:2rem;
+    "
+>
+
+    <h2 class="page-title">
+        Gerenciamento de Usuários
+    </h2>
+
+
+    <div class="user-profile">
+
+        <div
+            class="user-info"
+            style="text-align:right;"
+        >
+
+            <h4 id="user-name">
+                Carregando...
+            </h4>
+
+            <p id="user-role">
+                Carregando...
+            </p>
+
+        </div>
+
+
+        <div
+            id="user-avatar"
+            style="
+                width:40px;
+                height:40px;
+                border-radius:50%;
+                background:var(--primary-color);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-weight:bold;
+            "
+        >
+            -
+        </div>
+
+
+        <a
+            href="#"
+            id="logout-btn"
+            title="Sair"
+            style="
+                color:var(--text-muted);
+                margin-left:1rem;
+            "
+        >
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+        </a>
+
+    </div>
+
+</header>
+
+
+<div
+    id="alert-box"
+    class="alert"
+    style="display:none;"
+></div>
+
+
+<!-- =====================================================
+     CADASTRO - ADMIN
+====================================================== -->
+
+<section
+    id="painel-cadastro"
+    class="glass"
+    style="
+        padding:2rem;
+        margin-bottom:2rem;
+        display:none;
+    "
+>
+
+    <h3 style="margin-bottom:1.5rem;">
+
+        <i class="fa-solid fa-user-plus"></i>
+
+        Novo Usuário
+
+    </h3>
+
+
+    <form id="form-cadastro">
+
+
+        <div class="grid-form">
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Matrícula
+                </label>
+
+                <input
+                    type="text"
+                    id="matricula"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Nome Completo
+                </label>
+
+                <input
+                    type="text"
+                    id="nome"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Função / Cargo
+                </label>
+
+                <input
+                    type="text"
+                    id="funcao"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Setor
+                </label>
+
+                <select
+                    id="id_setor"
+                    class="form-control"
+                    required
+                ></select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Nível de Acesso
+                </label>
+
+                <select
+                    id="nivel_acesso"
+                    class="form-control"
+                    required
+                >
+
+                    <option value="Colaborador">
+                        Colaborador
+                    </option>
+
+                    <option value="Gestor">
+                        Gestor
+                    </option>
+
+                    <option value="Administrador">
+                        Administrador
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label" for="visao_estrategica">
+                    <input type="checkbox" id="visao_estrategica" style="width:auto;vertical-align:middle;">
+                    Conceder visão estratégica (IC-01 a IC-04)
+                </label>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Senha Temporária
+                </label>
+
+                <input
+                    type="password"
+                    id="senha"
+                    class="form-control"
+                    required
+                >
+
+                <span class="password-help">
+
+                    Mínimo 6 caracteres,
+                    com maiúscula, minúscula,
+                    número e caractere especial.
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+            style="
+                width:auto;
+                margin-top:1rem;
+            "
+        >
+
+            <i class="fa-solid fa-user-plus"></i>
+
+            Cadastrar Usuário
+
+        </button>
+
+
+    </form>
+
+</section>
+
+
+<!-- =====================================================
+     FILTROS
+====================================================== -->
+
+<section
+    class="glass"
+    style="
+        padding:2rem;
+        margin-bottom:2rem;
+    "
+>
+
+    <h3 style="margin-bottom:1rem;">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        Consultar Usuários
+
+    </h3>
+
+
+    <form
+        id="form-busca"
+        class="filter-grid"
+    >
+
+
+        <div class="form-group" style="margin:0;">
+
+            <label class="form-label">
+                Nome ou Matrícula
+            </label>
+
+            <input
+                type="text"
+                id="search"
+                class="form-control"
+                placeholder="Pesquisar..."
+            >
+
+        </div>
+
+
+        <div class="form-group" style="margin:0;">
+
+            <label class="form-label">
+                Setor
+            </label>
+
+            <select
+                id="filter_setor"
+                class="form-control"
+            >
+
+                <option value="todos">
+                    Todos
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+            style="width:auto;"
+        >
+
+            <i class="fa-solid fa-search"></i>
+
+            Buscar
+
+        </button>
+
+
+        <button
+            type="button"
+            id="btn-limpar"
+            class="btn"
+            style="
+                display:none;
+                background:var(--status-gray);
+                color:white;
+            "
+        >
+
+            Limpar
+
+        </button>
+
+
+    </form>
+
+</section>
+
+
+<!-- =====================================================
+     LISTA
+====================================================== -->
+
+<section
+    class="glass"
+    style="padding:2rem;"
+>
+
+    <h3
+        id="lista-titulo"
+        style="margin-bottom:1rem;"
+    >
+        Lista de Usuários
+    </h3>
+
+
+    <div class="table-container">
+
+        <table
+            class="data-table"
+            id="table-usuarios"
+        >
+
+            <thead>
+
+                <tr>
+
+                    <th>Matrícula</th>
+
+                    <th>Nome</th>
+
+                    <th>Função</th>
+
+                    <th>Setor</th>
+
+                    <th>Nível</th>
+
+                    <th id="coluna-acoes">
+                        Ações
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        style="text-align:center;"
+                    >
+                        Carregando...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL SENHA
+====================================================== -->
+
+<div
+    id="modal-senha"
+    class="modal-overlay"
+>
+
+<div class="modal-box">
+
+
+    <div class="modal-header">
+
+        <h3>
+            <i class="fa-solid fa-key"></i>
+            Redefinir Senha
+        </h3>
+
+        <button
+            class="close-btn"
+            id="btn-fechar-modal"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+
+        <p style="margin-bottom:1rem;">
+
+            Usuário:
+
+            <strong id="nome_usuario_modal">
+            </strong>
+
+        </p>
+
+
+        <form id="form-reset">
+
+
+            <input
+                type="hidden"
+                id="id_usuario_reset"
+            >
+
+
+            <div class="form-group">
+
+                <label>
+                    Nova Senha
+                </label>
+
+                <input
+                    type="password"
+                    id="nova_senha_reset"
+                    class="form-control"
+                    required
+                    style="
+                        color:#26364a;
+                        background:white;
+                    "
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Salvar Nova Senha
+            </button>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_URL =
+    `http://${window.location.hostname}:8000/api/v1`;
+
+
+const token =
+    localStorage.getItem('jwt_token');
+
+
+const user =
+    JSON.parse(
+        localStorage.getItem('user') ||
+        'null'
+    );
+
+
+// ========================================================
+// AUTENTICAÇÃO
+// ========================================================
+
+if (!token || !user) {
+
+    window.location.href =
+        'index.html';
+}
+
+
+if (user && user.primeiro_acesso) {
+
+    window.location.href =
+        'primeiro-acesso.html';
+}
+
+
+if (
+    user &&
+    user.nivel_acesso !== 'Administrador' &&
+    user.nivel_acesso !== 'Gestor'
+) {
+
+    window.location.href =
+        'dashboard.html';
+}
+
+
+// ========================================================
+// CABEÇALHO
+// ========================================================
+
+document
+    .getElementById('user-name')
+    .textContent =
+        user.nome;
+
+
+document
+    .getElementById('user-role')
+    .textContent =
+        user.nivel_acesso;
+
+
+document
+    .getElementById('user-avatar')
+    .textContent =
+        user.nome
+            ? user.nome.charAt(0).toUpperCase()
+            : '?';
+
+
+// ========================================================
+// ADMIN
+// ========================================================
+
+if (
+    user.nivel_acesso ===
+    'Administrador'
+) {
+
+    document
+        .getElementById(
+            'painel-cadastro'
+        )
+        .style.display =
+            'block';
+
+}
+
+
+// ========================================================
+// LOGOUT
+// ========================================================
+
+document
+    .getElementById('logout-btn')
+    .addEventListener(
+        'click',
+        function (event) {
+
+            event.preventDefault();
+
+            localStorage.clear();
+
+            window.location.href =
+                'index.html';
+
+        }
+    );
+
+
+// ========================================================
+// CONFIGURAÇÃO API
+// ========================================================
+
+const apiHeaders = {
+
+    'Authorization':
+        `Bearer ${token}`,
+
+    'Content-Type':
+        'application/json'
+
+};
+
+
+let usuariosList = [];
+
+let setoresMap = {};
+
+
+// ========================================================
+// ALERTA
+// ========================================================
+
+function mostrarAlerta(
+    mensagem,
+    erro = false
+) {
+
+    const box =
+        document.getElementById(
+            'alert-box'
+        );
+
+
+    box.className =
+        erro
+            ? 'alert alert-error'
+            : 'alert alert-success';
+
+
+    box.textContent =
+        mensagem;
+
+
+    box.style.display =
+        'block';
+
+
+    setTimeout(
+        function () {
+
+            box.style.display =
+                'none';
+
+        },
+        4000
+    );
+
+}
+
+
+// ========================================================
+// INICIALIZAÇÃO
+// ========================================================
+
+async function init() {
+
+    try {
+
+        const [
+            setoresResponse,
+            usuariosResponse
+        ] = await Promise.all([
+
+            fetch(
+                `${API_URL}/setores/`,
+                {
+                    headers:
+                        apiHeaders
+                }
+            ),
+
+            fetch(
+                `${API_URL}/usuarios/`,
+                {
+                    headers:
+                        apiHeaders
+                }
+            )
+
+        ]);
+
+
+        if (
+            setoresResponse.status === 401 ||
+            usuariosResponse.status === 401
+        ) {
+
+            localStorage.clear();
+
+            window.location.href =
+                'index.html';
+
+            return;
+        }
+
+
+        if (
+            !setoresResponse.ok ||
+            !usuariosResponse.ok
+        ) {
+
+            mostrarAlerta(
+                'Erro ao carregar os dados.',
+                true
+            );
+
+            return;
+        }
+
+
+        const setores =
+            await setoresResponse.json();
+
+
+        usuariosList =
+            await usuariosResponse.json();
+
+
+        setoresMap = {};
+
+
+        const selectCadastro =
+            document.getElementById(
+                'id_setor'
+            );
+
+
+        const selectFiltro =
+            document.getElementById(
+                'filter_setor'
+            );
+
+
+        selectCadastro.innerHTML = '';
+
+        selectFiltro.innerHTML =
+            '<option value="todos">Todos</option>';
+
+
+        setores.forEach(
+            function (setor) {
+
+                setoresMap[
+                    setor.id_setor
+                ] =
+                    setor.nome;
+
+
+                selectCadastro.innerHTML +=
+                    `
+                    <option value="${setor.id_setor}">
+                        ${setor.nome}
+                    </option>
+                    `;
+
+
+                selectFiltro.innerHTML +=
+                    `
+                    <option value="${setor.id_setor}">
+                        ${setor.nome}
+                    </option>
+                    `;
+
+            }
+        );
+
+
+        if (
+            user.nivel_acesso ===
+            'Gestor'
+        ) {
+
+            selectFiltro.value =
+                String(user.id_setor);
+
+            selectFiltro.disabled =
+                true;
+
+
+            document
+                .getElementById(
+                    'lista-titulo'
+                )
+                .textContent =
+                    'Usuários do Setor: ' +
+                    (
+                        setoresMap[
+                            user.id_setor
+                        ] ||
+                        ''
+                    );
+        }
+
+
+        renderUsuarios();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        mostrarAlerta(
+            'Erro ao conectar com a API.',
+            true
+        );
+    }
+
+}
+
+
+// ========================================================
+// RENDERIZAR USUÁRIOS
+// ========================================================
+
+function renderUsuarios() {
+
+    const tbody =
+        document.querySelector(
+            '#table-usuarios tbody'
+        );
+
+
+    tbody.innerHTML = '';
+
+
+    const termo =
+        document
+            .getElementById('search')
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const filtroSetor =
+        document
+            .getElementById(
+                'filter_setor'
+            )
+            .value;
+
+
+    let filtrados =
+        [...usuariosList];
+
+
+    if (termo) {
+
+        filtrados =
+            filtrados.filter(
+                function (usuario) {
+
+                    return (
+
+                        String(
+                            usuario.nome || ''
+                        )
+                        .toLowerCase()
+                        .includes(termo)
+
+                        ||
+
+                        String(
+                            usuario.matricula || ''
+                        )
+                        .toLowerCase()
+                        .includes(termo)
+
+                    );
+
+                }
+            );
+    }
+
+
+    if (
+        filtroSetor !==
+        'todos'
+    ) {
+
+        filtrados =
+            filtrados.filter(
+                function (usuario) {
+
+                    return (
+                        String(
+                            usuario.id_setor
+                        )
+                        ===
+                        String(
+                            filtroSetor
+                        )
+                    );
+
+                }
+            );
+    }
+
+
+    document
+        .getElementById(
+            'btn-limpar'
+        )
+        .style.display =
+            termo ||
+            (
+                filtroSetor !==
+                'todos' &&
+                user.nivel_acesso !==
+                'Gestor'
+            )
+            ? 'inline-block'
+            : 'none';
+
+
+    if (
+        filtrados.length === 0
+    ) {
+
+        tbody.innerHTML =
+            `
+            <tr>
+                <td
+                    colspan="6"
+                    style="text-align:center;"
+                >
+                    Nenhum usuário encontrado.
+                </td>
+            </tr>
+            `;
+
+        return;
+    }
+
+
+    filtrados.forEach(
+        function (usuario) {
+
+            const setor =
+                setoresMap[
+                    usuario.id_setor
+                ] ||
+                'Não informado';
+
+
+            let nivel =
+                usuario.nivel_acesso;
+
+
+            if (
+                nivel ===
+                'Administrador'
+            ) {
+
+                nivel =
+                    `
+                    <span
+                        style="
+                            color:var(--status-green);
+                            font-weight:bold;
+                        "
+                    >
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Administrador
+                    </span>
+                    `;
+            }
+
+
+            let acoes = '';
+
+
+            // RN03: nem o administrador pode redefinir a senha de terceiros.
+            if (
+                user.nivel_acesso ===
+                'Administrador'
+            ) {
+
+                acoes += `
+                    <button class="btn btn-sm" onclick="alternarVisaoEstrategica(${usuario.id_usuario}, ${!usuario.visao_estrategica})"
+                        title="${usuario.visao_estrategica ? 'Revogar' : 'Conceder'} visão estratégica">
+                        ${usuario.visao_estrategica ? 'Revogar IC' : 'Conceder IC'}
+                    </button>
+                `;
+
+                if (
+                    usuario.id_usuario !==
+                    user.id_usuario
+                ) {
+
+                    acoes +=
+                        `
+                        <button
+                            class="btn btn-sm"
+                            style="
+                                background:var(--status-red);
+                                color:white;
+                            "
+                            onclick="excluirUsuario(
+                                ${usuario.id_usuario}
+                            )"
+                            title="Excluir usuário"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        `;
+                }
+            }
+
+
+            tbody.innerHTML +=
+                `
+                <tr>
+
+                    <td>
+                        ${usuario.matricula}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${usuario.nome}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${usuario.funcao || '-'}
+                    </td>
+
+                    <td>
+                        <span
+                            class="
+                                status-tag
+                                status-encerrado
+                            "
+                        >
+                            ${setor}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${nivel}
+                    </td>
+
+                    <td>
+                        ${acoes || '-'}
+                    </td>
+
+                </tr>
+                `;
+
+        }
+    );
+
+}
+
+
+// ========================================================
+// ESCAPAR TEXTO PARA BOTÃO
+// ========================================================
+
+function escaparTexto(texto) {
+
+    return String(texto || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'");
+
+}
+
+
+// ========================================================
+// BUSCA
+// ========================================================
+
+document
+    .getElementById(
+        'form-busca'
+    )
+    .addEventListener(
+        'submit',
+        function (event) {
+
+            event.preventDefault();
+
+            renderUsuarios();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        'filter_setor'
+    )
+    .addEventListener(
+        'change',
+        renderUsuarios
+    );
+
+
+document
+    .getElementById(
+        'btn-limpar'
+    )
+    .addEventListener(
+        'click',
+        function () {
+
+            document
+                .getElementById(
+                    'search'
+                )
+                .value = '';
+
+
+            if (
+                user.nivel_acesso ===
+                'Administrador'
+            ) {
+
+                document
+                    .getElementById(
+                        'filter_setor'
+                    )
+                    .value =
+                        'todos';
+            }
+
+
+            renderUsuarios();
+
+        }
+    );
+
+
+// ========================================================
+// CADASTRO
+// ========================================================
+
+document
+    .getElementById(
+        'form-cadastro'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+
+            if (
+                user.nivel_acesso !==
+                'Administrador'
+            ) {
+
+                mostrarAlerta(
+                    'Apenas administradores podem cadastrar usuários.',
+                    true
+                );
+
+                return;
+            }
+
+
+            const body = {
+
+                matricula:
+                    document
+                        .getElementById(
+                            'matricula'
+                        )
+                        .value
+                        .trim(),
+
+                nome:
+                    document
+                        .getElementById(
+                            'nome'
+                        )
+                        .value
+                        .trim(),
+
+                funcao:
+                    document
+                        .getElementById(
+                            'funcao'
+                        )
+                        .value
+                        .trim(),
+
+                id_setor:
+                    Number(
+                        document
+                            .getElementById(
+                                'id_setor'
+                            )
+                            .value
+                    ),
+
+                nivel_acesso:
+                    document
+                        .getElementById(
+                            'nivel_acesso'
+                        )
+                        .value,
+
+                visao_estrategica:
+                    document.getElementById('visao_estrategica').checked,
+
+                senha:
+                    document
+                        .getElementById(
+                            'senha'
+                        )
+                        .value
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/usuarios/`,
+
+                        {
+
+                            method:
+                                'POST',
+
+                            headers:
+                                apiHeaders,
+
+                            body:
+                                JSON.stringify(
+                                    body
+                                )
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    mostrarAlerta(
+                        formatarErro(data),
+                        true
+                    );
+
+                    return;
+                }
+
+
+                mostrarAlerta(
+                    'Usuário cadastrado com sucesso!'
+                );
+
+
+                event.target.reset();
+
+
+                await init();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarAlerta(
+                    'Erro ao cadastrar usuário.',
+                    true
+                );
+            }
+
+        }
+    );
+
+
+// ========================================================
+// EXCLUIR
+// ========================================================
+
+window.alternarVisaoEstrategica = async function (id, conceder) {
+    if (user.nivel_acesso !== 'Administrador') return;
+    try {
+        const response = await fetch(`${API_URL}/usuarios/${id}/`, {
+            method: 'PATCH',
+            headers: { ...apiHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visao_estrategica: conceder })
+        });
+        if (!response.ok) throw new Error(formatarErro(await response.json()));
+        mostrarAlerta(conceder ? 'Visão estratégica concedida.' : 'Visão estratégica revogada.');
+        await init();
+    } catch (error) {
+        mostrarAlerta(error.message, true);
+    }
+};
+
+window.excluirUsuario =
+    async function (id) {
+
+        if (
+            user.nivel_acesso !==
+            'Administrador'
+        ) {
+
+            return;
+        }
+
+
+        if (
+            Number(id) ===
+            Number(user.id_usuario)
+        ) {
+
+            mostrarAlerta(
+                'Você não pode excluir seu próprio usuário.',
+                true
+            );
+
+            return;
+        }
+
+
+        if (
+            !confirm(
+                'Tem certeza que deseja excluir este usuário?'
+            )
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/usuarios/${id}/`,
+
+                    {
+
+                        method:
+                            'DELETE',
+
+                        headers:
+                            apiHeaders
+
+                    }
+
+                );
+
+
+            if (!response.ok) {
+
+                const data =
+                    await response.json();
+
+                mostrarAlerta(
+                    formatarErro(data),
+                    true
+                );
+
+                return;
+            }
+
+
+            mostrarAlerta(
+                'Usuário excluído com sucesso!'
+            );
+
+
+            await init();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            mostrarAlerta(
+                'Erro ao excluir usuário.',
+                true
+            );
+        }
+
+    };
+
+
+// ========================================================
+// MODAL
+// ========================================================
+
+window.abrirModalSenha =
+    function (id, nome) {
+
+        document
+            .getElementById(
+                'id_usuario_reset'
+            )
+            .value =
+                id;
+
+
+        document
+            .getElementById(
+                'nome_usuario_modal'
+            )
+            .textContent =
+                nome;
+
+
+        document
+            .getElementById(
+                'modal-senha'
+            )
+            .classList
+            .add('active');
+
+    };
+
+
+function fecharModal() {
+
+    document
+        .getElementById(
+            'modal-senha'
+        )
+        .classList
+        .remove('active');
+
+
+    document
+        .getElementById(
+            'form-reset'
+        )
+        .reset();
+
+}
+
+
+document
+    .getElementById(
+        'btn-fechar-modal'
+    )
+    .addEventListener(
+        'click',
+        fecharModal
+    );
+
+
+// RN03: redefinição de senha por administrador removida.
+
+// ========================================================
+// FORMATAR ERRO DA API
+// ========================================================
+
+function formatarErro(data) {
+
+    if (!data) {
+
+        return 'Erro inesperado.';
+    }
+
+
+    if (
+        typeof data.error ===
+        'string'
+    ) {
+
+        return data.error;
+    }
+
+
+    const mensagens = [];
+
+
+    Object.keys(data)
+        .forEach(
+            function (campo) {
+
+                const valor =
+                    data[campo];
+
+
+                if (
+                    Array.isArray(valor)
+                ) {
+
+                    mensagens.push(
+                        valor.join(' ')
+                    );
+
+                } else {
+
+                    mensagens.push(
+                        String(valor)
+                    );
+                }
+
+            }
+        );
+
+
+    return (
+        mensagens.join(' ') ||
+        'Erro inesperado.'
+    );
+
+}
+
+
+// ========================================================
+// INICIAR
+// ========================================================
+
+init();
+
+</script>
+
+</body>
+
+</html>
