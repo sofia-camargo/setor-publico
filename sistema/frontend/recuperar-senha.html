@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Recuperar Senha | SIGDEI</title>
+
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
+
+    <style>
+
+        .auth-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+            color: var(--text-color);
+        }
+
+        .pergunta-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .pergunta-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .pergunta-box strong {
+            color: var(--text-color);
+        }
+
+        .password-info {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="auth-container">
+
+<div class="auth-card glass">
+
+
+    <img
+        src="assets/img/logo_prefeitura.png"
+        alt="Logo Prefeitura"
+        style="
+            width: 100px;
+            display: block;
+            margin: 0 auto 1.5rem;
+        "
+    >
+
+
+    <h1>Recuperar Senha</h1>
+
+
+    <p id="descricao">
+
+        Informe sua matrícula para iniciar
+        a recuperação da senha.
+
+    </p>
+
+
+    <div
+        id="alert-box"
+        class="alert alert-error"
+        style="display:none;"
+    ></div>
+
+
+    <!-- ===============================================
+         ETAPA 1 - MATRÍCULA
+    ================================================ -->
+
+    <form id="form-matricula">
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Matrícula
+            </label>
+
+            <input
+                type="text"
+                id="matricula"
+                class="form-control"
+                autocomplete="off"
+                required
+            >
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Continuar
+        </button>
+
+    </form>
+
+
+    <!-- ===============================================
+         ETAPA 2 - PERGUNTA
+    ================================================ -->
+
+    <form
+        id="form-resposta"
+        style="display:none;"
+    >
+
+
+        <div class="pergunta-box">
+
+            <span>
+                Sua pergunta de segurança:
+            </span>
+
+            <strong id="pergunta">
+                -
+            </strong>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Resposta
+            </label>
+
+            <input
+                type="text"
+                id="resposta"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Verificar resposta
+        </button>
+
+
+    </form>
+
+
+    <!-- ===============================================
+         ETAPA 3 - NOVA SENHA
+    ================================================ -->
+
+    <form
+        id="form-nova-senha"
+        style="display:none;"
+    >
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Nova senha
+            </label>
+
+            <input
+                type="password"
+                id="nova-senha"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+
+        <div class="password-info">
+
+            A senha deve possuir no mínimo
+            6 caracteres, uma letra maiúscula,
+            uma minúscula, um número e um
+            caractere especial.
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Confirmar senha
+            </label>
+
+            <input
+                type="password"
+                id="confirmar-senha"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Alterar senha
+        </button>
+
+
+    </form>
+
+
+    <a
+        href="index.html"
+        class="auth-link"
+    >
+        Voltar para o login
+    </a>
+
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_URL =
+    `http://${window.location.hostname}:8000/api/v1`;
+
+
+let matriculaAtual = '';
+
+let tokenRecuperacao = '';
+
+
+const alertBox =
+    document.getElementById(
+        'alert-box'
+    );
+
+
+const descricao =
+    document.getElementById(
+        'descricao'
+    );
+
+
+// ========================================================
+// FUNÇÕES
+// ========================================================
+
+function mostrarErro(mensagem) {
+
+    alertBox.className =
+        'alert alert-error';
+
+    alertBox.textContent =
+        mensagem;
+
+    alertBox.style.display =
+        'block';
+}
+
+
+function esconderAlerta() {
+
+    alertBox.style.display =
+        'none';
+}
+
+
+// ========================================================
+// ETAPA 1
+// ========================================================
+
+document
+    .getElementById(
+        'form-matricula'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+            esconderAlerta();
+
+
+            matriculaAtual =
+                document
+                    .getElementById(
+                        'matricula'
+                    )
+                    .value
+                    .trim();
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/recuperar-senha/pergunta/`,
+
+                        {
+
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type':
+                                    'application/json'
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    matricula:
+                                        matriculaAtual
+
+                                })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    mostrarErro(
+
+                        data.error ||
+                        'Não foi possível continuar.'
+
+                    );
+
+                    return;
+                }
+
+
+                document
+                    .getElementById(
+                        'pergunta'
+                    )
+                    .textContent =
+                        data.pergunta;
+
+
+                document
+                    .getElementById(
+                        'form-matricula'
+                    )
+                    .style.display =
+                        'none';
+
+
+                document
+                    .getElementById(
+                        'form-resposta'
+                    )
+                    .style.display =
+                        'block';
+
+
+                descricao.textContent =
+                    'Responda à pergunta de segurança cadastrada na sua conta.';
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarErro(
+                    'Erro ao conectar com o servidor.'
+                );
+            }
+
+        }
+    );
+
+
+// ========================================================
+// ETAPA 2
+// ========================================================
+
+document
+    .getElementById(
+        'form-resposta'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+            esconderAlerta();
+
+
+            const resposta =
+                document
+                    .getElementById(
+                        'resposta'
+                    )
+                    .value
+                    .trim();
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/recuperar-senha/verificar/`,
+
+                        {
+
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type':
+                                    'application/json'
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    matricula:
+                                        matriculaAtual,
+
+                                    resposta:
+                                        resposta
+
+                                })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    mostrarErro(
+
+                        data.error ||
+                        'Resposta incorreta.'
+
+                    );
+
+                    return;
+                }
+
+
+                tokenRecuperacao =
+                    data.token;
+
+
+                document
+                    .getElementById(
+                        'form-resposta'
+                    )
+                    .style.display =
+                        'none';
+
+
+                document
+                    .getElementById(
+                        'form-nova-senha'
+                    )
+                    .style.display =
+                        'block';
+
+
+                descricao.textContent =
+                    'Resposta confirmada. Agora defina sua nova senha.';
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarErro(
+                    'Erro ao conectar com o servidor.'
+                );
+            }
+
+        }
+    );
+
+
+// ========================================================
+// ETAPA 3
+// ========================================================
+
+document
+    .getElementById(
+        'form-nova-senha'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+            esconderAlerta();
+
+
+            const novaSenha =
+                document
+                    .getElementById(
+                        'nova-senha'
+                    )
+                    .value;
+
+
+            const confirmarSenha =
+                document
+                    .getElementById(
+                        'confirmar-senha'
+                    )
+                    .value;
+
+
+            if (
+                novaSenha !==
+                confirmarSenha
+            ) {
+
+                mostrarErro(
+                    'As senhas não são iguais.'
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/recuperar-senha/redefinir/`,
+
+                        {
+
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type':
+                                    'application/json'
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    token:
+                                        tokenRecuperacao,
+
+                                    nova_senha:
+                                        novaSenha
+
+                                })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    let mensagem =
+                        data.error || data;
+
+
+                    if (
+                        typeof mensagem ===
+                        'object'
+                    ) {
+
+                        mensagem =
+                            JSON.stringify(
+                                mensagem
+                            );
+                    }
+
+
+                    mostrarErro(
+                        mensagem
+                    );
+
+                    return;
+                }
+
+
+                alert(
+                    'Senha alterada com sucesso!'
+                );
+
+
+                window.location.href =
+                    'index.html';
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarErro(
+                    'Erro ao conectar com o servidor.'
+                );
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

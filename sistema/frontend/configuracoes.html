@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Configurações | SIGDEI
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+
+    <style>
+
+        .grid-form {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(200px,1fr)
+                );
+
+            gap:1rem;
+        }
+
+
+        .config-grid {
+
+            display:grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:2rem;
+        }
+
+
+        .config-section {
+
+            padding:2rem;
+
+            margin-bottom:2rem;
+        }
+
+
+        .readonly-field {
+
+            background:
+                rgba(255,255,255,0.05)
+                !important;
+
+            color:#dbeaf4 !important;
+
+            cursor:not-allowed;
+        }
+
+
+        .form-control {
+            background:#064a7d;
+        }
+
+
+        .password-help {
+
+            display:block;
+
+            color:var(--text-muted);
+
+            font-size:0.75rem;
+
+            line-height:1.5;
+
+            margin-top:0.5rem;
+        }
+
+
+        @media(max-width:900px) {
+
+            .config-grid {
+                grid-template-columns:1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app-container">
+
+
+<aside class="sidebar">
+
+
+    <div class="sidebar-logo">
+
+        <img
+            src="assets/img/logo_prefeitura.png"
+            alt="Logo Prefeitura"
+            style="height:35px;"
+        >
+
+        <span>SIGDEI</span>
+
+    </div>
+
+
+    <ul class="nav-menu">
+
+
+        <li>
+
+            <a
+                href="dashboard.html"
+                class="nav-link"
+            >
+
+                <i class="fa-solid fa-chart-pie"></i>
+
+                Painel de Controle
+
+            </a>
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="oficios.html"
+                class="nav-link"
+            >
+
+                <i class="fa-solid fa-file-signature"></i>
+
+                Ofícios
+
+            </a>
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="projetos.html"
+                class="nav-link"
+            >
+
+                <i class="fa-solid fa-project-diagram"></i>
+
+                Projetos
+
+            </a>
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="indicadores.html"
+                class="nav-link"
+            >
+
+                <i class="fa-solid fa-chart-bar"></i>
+
+                Indicadores
+
+            </a>
+
+        </li>
+
+
+        <li
+            id="menu-usuarios"
+            style="display:none;"
+        >
+
+            <a
+                href="usuarios.html"
+                class="nav-link"
+            >
+
+                <i class="fa-solid fa-users"></i>
+
+                Usuários
+
+            </a>
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="configuracoes.html"
+                class="nav-link active"
+            >
+
+                <i class="fa-solid fa-gear"></i>
+
+                Configurações
+
+            </a>
+
+        </li>
+
+
+    </ul>
+
+</aside>
+
+
+<main class="main-content">
+
+
+<header
+    class="header glass"
+    style="
+        padding:1rem 2rem;
+        border-radius:12px;
+        margin-bottom:2rem;
+    "
+>
+
+
+    <h2 class="page-title">
+        Configurações da Conta
+    </h2>
+
+
+    <div class="user-profile">
+
+
+        <div
+            class="user-info"
+            style="text-align:right;"
+        >
+
+            <h4 id="user-name">
+                Carregando...
+            </h4>
+
+            <p id="user-role">
+                Carregando...
+            </p>
+
+        </div>
+
+
+        <div
+            id="user-avatar"
+            style="
+                width:40px;
+                height:40px;
+                border-radius:50%;
+                background:var(--primary-color);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-weight:bold;
+            "
+        >
+            -
+        </div>
+
+
+        <a
+            href="#"
+            id="logout-btn"
+            title="Sair"
+            style="
+                color:var(--text-muted);
+                margin-left:1rem;
+            "
+        >
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+        </a>
+
+
+    </div>
+
+</header>
+
+
+<div
+    id="alert-box"
+    class="alert"
+    style="display:none;"
+></div>
+
+
+<div class="config-grid">
+
+
+<!-- =====================================================
+     PERFIL
+====================================================== -->
+
+<section class="glass config-section">
+
+
+    <h3 style="margin-bottom:1.5rem;">
+
+        <i class="fa-solid fa-id-card"></i>
+
+        Meu Cadastro
+
+    </h3>
+
+
+    <form id="form-perfil">
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Matrícula
+            </label>
+
+            <input
+                type="text"
+                id="matricula"
+                class="form-control readonly-field"
+                readonly
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Nome Completo
+            </label>
+
+            <input
+                type="text"
+                id="nome_usuario"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Função
+            </label>
+
+            <input
+                type="text"
+                id="funcao"
+                class="form-control"
+            >
+
+        </div>
+
+
+        <div class="grid-form">
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Setor
+                </label>
+
+                <input
+                    type="text"
+                    id="nome_setor"
+                    class="form-control readonly-field"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Nível de Acesso
+                </label>
+
+                <input
+                    type="text"
+                    id="nivel_acesso"
+                    class="form-control readonly-field"
+                    readonly
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+
+            <i class="fa-solid fa-save"></i>
+
+            Atualizar Dados
+
+        </button>
+
+
+    </form>
+
+
+</section>
+
+
+<!-- =====================================================
+     SENHA
+====================================================== -->
+
+<section class="glass config-section">
+
+
+    <h3 style="margin-bottom:1.5rem;">
+
+        <i class="fa-solid fa-lock"></i>
+
+        Alterar Senha
+
+    </h3>
+
+
+    <form id="form-senha">
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Senha Atual
+            </label>
+
+            <input
+                type="password"
+                id="senha_atual"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Nova Senha
+            </label>
+
+            <input
+                type="password"
+                id="nova_senha"
+                class="form-control"
+                required
+            >
+
+            <span class="password-help">
+
+                Mínimo 6 caracteres,
+                com letra maiúscula,
+                minúscula, número e
+                caractere especial.
+
+            </span>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Confirmar Nova Senha
+            </label>
+
+            <input
+                type="password"
+                id="confirmar_senha"
+                class="form-control"
+                required
+            >
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+
+            <i class="fa-solid fa-key"></i>
+
+            Alterar Senha
+
+        </button>
+
+
+    </form>
+
+
+</section>
+
+
+</div>
+
+</main>
+
+</div>
+
+
+<script>
+
+const API_URL =
+    `http://${window.location.hostname}:8000/api/v1`;
+
+
+const token =
+    localStorage.getItem('jwt_token');
+
+
+let user =
+    JSON.parse(
+        localStorage.getItem('user') ||
+        'null'
+    );
+
+
+// ========================================================
+// AUTENTICAÇÃO
+// ========================================================
+
+if (!token || !user) {
+
+    window.location.href =
+        'index.html';
+}
+
+
+if (
+    user &&
+    user.primeiro_acesso
+) {
+
+    window.location.href =
+        'primeiro-acesso.html';
+}
+
+
+// ========================================================
+// CABEÇALHO
+// ========================================================
+
+document
+    .getElementById(
+        'user-name'
+    )
+    .textContent =
+        user.nome;
+
+
+document
+    .getElementById(
+        'user-role'
+    )
+    .textContent =
+        user.nivel_acesso;
+
+
+document
+    .getElementById(
+        'user-avatar'
+    )
+    .textContent =
+        user.nome
+            ? user.nome
+                .charAt(0)
+                .toUpperCase()
+            : '?';
+
+
+// Menu usuários
+
+if (
+    user.nivel_acesso ===
+        'Administrador'
+    ||
+    user.nivel_acesso ===
+        'Gestor'
+) {
+
+    document
+        .getElementById(
+            'menu-usuarios'
+        )
+        .style.display =
+            'block';
+}
+
+
+// ========================================================
+// LOGOUT
+// ========================================================
+
+document
+    .getElementById(
+        'logout-btn'
+    )
+    .addEventListener(
+        'click',
+        function (event) {
+
+            event.preventDefault();
+
+            localStorage.clear();
+
+            window.location.href =
+                'index.html';
+
+        }
+    );
+
+
+const apiHeaders = {
+
+    'Authorization':
+        `Bearer ${token}`,
+
+    'Content-Type':
+        'application/json'
+
+};
+
+
+// ========================================================
+// FORMULÁRIO
+// ========================================================
+
+document
+    .getElementById(
+        'matricula'
+    )
+    .value =
+        user.matricula || '';
+
+
+document
+    .getElementById(
+        'nome_usuario'
+    )
+    .value =
+        user.nome || '';
+
+
+document
+    .getElementById(
+        'funcao'
+    )
+    .value =
+        user.funcao || '';
+
+
+document
+    .getElementById(
+        'nivel_acesso'
+    )
+    .value =
+        user.nivel_acesso || '';
+
+
+// ========================================================
+// SETOR
+// ========================================================
+
+async function carregarSetor() {
+
+    if (!user.id_setor) {
+
+        document
+            .getElementById(
+                'nome_setor'
+            )
+            .value =
+                'Não informado';
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                `${API_URL}/setores/${user.id_setor}/`,
+
+                {
+                    headers:
+                        apiHeaders
+                }
+
+            );
+
+
+        if (response.ok) {
+
+            const setor =
+                await response.json();
+
+
+            document
+                .getElementById(
+                    'nome_setor'
+                )
+                .value =
+                    setor.nome ||
+                    'Não informado';
+
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+    }
+
+}
+
+
+// ========================================================
+// ALERTAS
+// ========================================================
+
+function mostrarAlerta(
+    mensagem,
+    erro = false
+) {
+
+    const box =
+        document.getElementById(
+            'alert-box'
+        );
+
+
+    box.className =
+        erro
+            ? 'alert alert-error'
+            : 'alert alert-success';
+
+
+    box.textContent =
+        mensagem;
+
+
+    box.style.display =
+        'block';
+
+
+    setTimeout(
+        function () {
+
+            box.style.display =
+                'none';
+
+        },
+        4000
+    );
+
+}
+
+
+// ========================================================
+// ATUALIZAR PERFIL
+// ========================================================
+
+document
+    .getElementById(
+        'form-perfil'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const body = {
+
+                nome:
+                    document
+                        .getElementById(
+                            'nome_usuario'
+                        )
+                        .value
+                        .trim(),
+
+                funcao:
+                    document
+                        .getElementById(
+                            'funcao'
+                        )
+                        .value
+                        .trim()
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/usuarios/${user.id_usuario}/`,
+
+                        {
+
+                            method:
+                                'PATCH',
+
+                            headers:
+                                apiHeaders,
+
+                            body:
+                                JSON.stringify(
+                                    body
+                                )
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    mostrarAlerta(
+                        'Não foi possível atualizar o perfil.',
+                        true
+                    );
+
+                    return;
+                }
+
+
+                user.nome =
+                    data.nome ||
+                    body.nome;
+
+
+                user.funcao =
+                    data.funcao ||
+                    body.funcao;
+
+
+                localStorage.setItem(
+
+                    'user',
+
+                    JSON.stringify(
+                        user
+                    )
+
+                );
+
+
+                document
+                    .getElementById(
+                        'user-name'
+                    )
+                    .textContent =
+                        user.nome;
+
+
+                document
+                    .getElementById(
+                        'user-avatar'
+                    )
+                    .textContent =
+                        user.nome
+                            .charAt(0)
+                            .toUpperCase();
+
+
+                mostrarAlerta(
+                    'Perfil atualizado com sucesso!'
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarAlerta(
+                    'Erro ao conectar com o servidor.',
+                    true
+                );
+            }
+
+        }
+    );
+
+
+// ========================================================
+// ALTERAR SENHA
+// ========================================================
+
+document
+    .getElementById(
+        'form-senha'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const senhaAtual =
+                document
+                    .getElementById(
+                        'senha_atual'
+                    )
+                    .value;
+
+
+            const novaSenha =
+                document
+                    .getElementById(
+                        'nova_senha'
+                    )
+                    .value;
+
+
+            const confirmarSenha =
+                document
+                    .getElementById(
+                        'confirmar_senha'
+                    )
+                    .value;
+
+
+            if (
+                novaSenha !==
+                confirmarSenha
+            ) {
+
+                mostrarAlerta(
+                    'As novas senhas não são iguais.',
+                    true
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/usuarios/alterar-senha/`,
+
+                        {
+
+                            method:
+                                'POST',
+
+                            headers:
+                                apiHeaders,
+
+                            body:
+                                JSON.stringify({
+
+                                    senha_atual:
+                                        senhaAtual,
+
+                                    nova_senha:
+                                        novaSenha
+
+                                })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    let mensagem =
+                        data.error ||
+                        data.senha ||
+                        data.nova_senha ||
+                        'Não foi possível alterar a senha.';
+
+
+                    if (
+                        Array.isArray(
+                            mensagem
+                        )
+                    ) {
+
+                        mensagem =
+                            mensagem.join(' ');
+                    }
+
+
+                    mostrarAlerta(
+                        mensagem,
+                        true
+                    );
+
+                    return;
+                }
+
+
+                mostrarAlerta(
+                    'Senha alterada com sucesso!'
+                );
+
+
+                event.target.reset();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarAlerta(
+                    'Erro ao conectar com o servidor.',
+                    true
+                );
+            }
+
+        }
+    );
+
+
+carregarSetor();
+
+</script>
+
+
+</body>
+
+</html>

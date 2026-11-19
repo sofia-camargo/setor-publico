@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGDEI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="app-shell">
+    <div class="app-container shell-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo" style="display:flex;align-items:center;gap:10px;">
+                <img src="assets/img/logo_prefeitura.png" alt="Logo Prefeitura de Iracemápolis" style="height:35px;width:auto;object-fit:contain;">
+                <span class="sidebar-brand-label">SIGDEI</span>
+            </div>
+            <ul class="nav-menu" id="shell-menu">
+                <li><a href="dashboard-content.html" class="nav-link active" data-title="Dashboard"><i class="fa-regular fa-chart-bar"></i><span class="nav-label">Painel de Controle</span></a></li>
+                <li><a href="oficios.html" class="nav-link" data-title="Gerenciamento de Ofícios"><i class="fa-regular fa-file-lines"></i><span class="nav-label">Ofícios</span></a></li>
+                <li><a href="projetos.html" class="nav-link" data-title="Projetos"><i class="fa-regular fa-folder-open"></i><span class="nav-label">Projetos</span></a></li>
+                <li><a href="indicadores.html" class="nav-link" data-title="Indicadores"><i class="fa-regular fa-chart-bar"></i><span class="nav-label">Indicadores</span></a></li>
+                <li id="shell-menu-cruzados" style="display:none;"><a href="indicadores-cruzados.html" class="nav-link" data-title="Indicadores cruzados"><i class="fa-solid fa-shuffle"></i><span class="nav-label">Indicadores cruzados</span></a></li>
+                <li><a href="atendimentos.html" class="nav-link" data-title="Atendimentos"><i class="fa-regular fa-building"></i><span class="nav-label">Atendimentos</span></a></li>
+                <li id="shell-menu-assistente" style="display:none;"><a href="assistente.html" class="nav-link" data-title="Assistente documental"><i class="fa-regular fa-comments"></i><span class="nav-label">Assistente</span></a></li>
+                <li id="shell-menu-usuarios" style="display:none;"><a href="usuarios.html" class="nav-link" data-title="Gerenciamento de Usuários"><i class="fa-regular fa-user"></i><span class="nav-label">Usuários</span></a></li>
+                <li><a href="configuracoes.html" class="nav-link" data-title="Configurações da Conta"><i class="fa-regular fa-circle-dot"></i><span class="nav-label">Configurações</span></a></li>
+            </ul>
+        </aside>
+        <section class="shell-workspace">
+            <header class="shell-topbar">
+                <div class="shell-title-group">
+                    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-label="Recolher menu lateral" aria-expanded="true" title="Recolher menu lateral"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                    <span class="shell-eyebrow">Dashboard interno</span>
+                    <h1 id="shell-title">Dashboard</h1>
+                    </div>
+                </div>
+                <div class="shell-account">
+                    <div class="shell-user-info"><strong id="shell-user-name">Carregando...</strong><span id="shell-user-role">Carregando...</span></div>
+                    <span class="shell-avatar" id="shell-user-avatar">-</span>
+                    <button type="button" class="shell-logout" id="shell-logout" title="Sair"><i class="fa-solid fa-right-from-bracket"></i><span>Sair</span></button>
+                </div>
+            </header>
+            <div class="frame-stack" aria-live="polite">
+                <iframe id="content-frame-a" class="content-frame is-active" title="Conteúdo do SIGDEI" src="dashboard-content.html"></iframe>
+                <iframe id="content-frame-b" class="content-frame" title="Conteúdo do SIGDEI"></iframe>
+            </div>
+        </section>
+    </div>
+    <script src="assets/js/app-shell.js"></script>
+</body>
+</html>

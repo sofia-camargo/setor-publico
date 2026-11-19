@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Primeiro Acesso | SIGDEI</title>
+
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
+
+    <style>
+
+        .password-info {
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .security-info {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <div class="auth-card glass">
+
+        <img
+            src="assets/img/logo_prefeitura.png"
+            alt="Logo Prefeitura"
+            style="
+                width: 100px;
+                display: block;
+                margin: 0 auto 1.5rem;
+            "
+        >
+
+        <h1>Primeiro Acesso</h1>
+
+        <p>
+            Antes de utilizar o sistema,
+            configure sua recuperação de senha
+            e defina uma nova senha.
+        </p>
+
+
+        <div class="security-info">
+
+            Crie uma pergunta cuja resposta
+            você consiga lembrar futuramente.
+
+            <br><br>
+
+            Exemplo:
+
+            <strong>
+                Qual minha comida favorita?
+            </strong>
+
+        </div>
+
+
+        <div
+            id="alert-box"
+            class="alert alert-error"
+            style="display:none;"
+        ></div>
+
+
+        <form id="form-primeiro-acesso">
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Pergunta de segurança
+                </label>
+
+                <input
+                    type="text"
+                    id="pergunta"
+                    class="form-control"
+                    placeholder="Digite sua pergunta"
+                    minlength="5"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Resposta
+                </label>
+
+                <input
+                    type="text"
+                    id="resposta"
+                    class="form-control"
+                    placeholder="Digite sua resposta"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Nova senha
+                </label>
+
+                <input
+                    type="password"
+                    id="nova-senha"
+                    class="form-control"
+                    placeholder="Digite sua nova senha"
+                    required
+                >
+
+            </div>
+
+
+            <div class="password-info">
+
+                A senha deve possuir no mínimo
+                6 caracteres, contendo:
+
+                <br>
+
+                • uma letra maiúscula<br>
+                • uma letra minúscula<br>
+                • um número<br>
+                • um caractere especial
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Confirmar nova senha
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmar-senha"
+                    class="form-control"
+                    placeholder="Digite novamente"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+                id="btn-salvar"
+            >
+                Salvar e continuar
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API_URL =
+    `http://${window.location.hostname}:8000/api/v1`;
+
+
+const token =
+    localStorage.getItem('jwt_token');
+
+
+let user =
+    JSON.parse(
+        localStorage.getItem('user') ||
+        'null'
+    );
+
+
+// Sem login
+
+if (!token || !user) {
+
+    window.location.href =
+        'index.html';
+}
+
+
+// Já realizou primeiro acesso
+
+if (
+    user &&
+    user.primeiro_acesso === false
+) {
+
+    window.location.href =
+        'dashboard.html';
+}
+
+
+// ========================================================
+// FORMULÁRIO
+// ========================================================
+
+document
+    .getElementById(
+        'form-primeiro-acesso'
+    )
+    .addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const pergunta =
+                document
+                    .getElementById('pergunta')
+                    .value
+                    .trim();
+
+
+            const resposta =
+                document
+                    .getElementById('resposta')
+                    .value
+                    .trim();
+
+
+            const novaSenha =
+                document
+                    .getElementById('nova-senha')
+                    .value;
+
+
+            const confirmarSenha =
+                document
+                    .getElementById('confirmar-senha')
+                    .value;
+
+
+            const alertBox =
+                document
+                    .getElementById('alert-box');
+
+
+            const btnSalvar =
+                document
+                    .getElementById('btn-salvar');
+
+
+            alertBox.style.display =
+                'none';
+
+
+            // Confirmar senha
+
+            if (
+                novaSenha !==
+                confirmarSenha
+            ) {
+
+                alertBox.textContent =
+                    'As senhas não são iguais.';
+
+                alertBox.style.display =
+                    'block';
+
+                return;
+            }
+
+
+            btnSalvar.disabled = true;
+
+            btnSalvar.textContent =
+                'Salvando...';
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/usuarios/primeiro-acesso/`,
+
+                        {
+
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type':
+                                    'application/json',
+
+                                'Authorization':
+                                    `Bearer ${token}`
+
+                            },
+
+                            body: JSON.stringify({
+
+                                pergunta_seguranca:
+                                    pergunta,
+
+                                resposta_seguranca:
+                                    resposta,
+
+                                nova_senha:
+                                    novaSenha
+
+                            })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    let mensagem =
+                        data.error ||
+                        'Não foi possível concluir o primeiro acesso.';
+
+
+                    if (
+                        typeof mensagem ===
+                        'object'
+                    ) {
+
+                        mensagem =
+                            JSON.stringify(
+                                mensagem
+                            );
+                    }
+
+
+                    alertBox.textContent =
+                        mensagem;
+
+                    alertBox.style.display =
+                        'block';
+
+                    return;
+                }
+
+
+                // Atualizar usuário local
+
+                user.primeiro_acesso =
+                    false;
+
+
+                localStorage.setItem(
+
+                    'user',
+
+                    JSON.stringify(user)
+
+                );
+
+
+                alert(
+                    'Configuração realizada com sucesso!'
+                );
+
+
+                window.location.href =
+                    'dashboard.html';
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                alertBox.textContent =
+                    'Erro ao conectar com o servidor.';
+
+                alertBox.style.display =
+                    'block';
+
+
+            } finally {
+
+                btnSalvar.disabled =
+                    false;
+
+                btnSalvar.textContent =
+                    'Salvar e continuar';
+
+            }
+
+        }
+
+    );
+
+</script>
+
+</body>
+
+</html>

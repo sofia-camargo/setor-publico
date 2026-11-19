@@ -1,0 +1,15 @@
+.venv/
+.deps/
+.deps-backend/
+__pycache__/
+*.pyc
+.index-build-*/
+.index-backup/
+.env
+documentos/*
+!documentos/.gitkeep
+sistema/backend/.venv/
+sistema/frontend/node_modules/
+origem/
+scratch/
+*.zip

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prévia do assistente · SIGDEI</title>
+  <link rel="stylesheet" href="../sistema/frontend/assets/css/style.css">
+  <style>
+    body { background: #f3f6fa; color: #163b59; font-family: system-ui, sans-serif; }
+    .assistant-page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
+    .assistant-heading { margin-bottom: 20px; }
+    .assistant-heading h1 { margin: 0 0 8px; font-size: 28px; }
+    .assistant-heading p { margin: 0; line-height: 1.5; }
+    .assistant-status { display: block; margin: 16px 0; color: #45637a; font-size: 14px; }
+    .assistant-messages { display: grid; gap: 14px; min-height: 180px; margin: 18px 0; }
+    .assistant-message { padding: 17px; background: #fff; border: 1px solid #d7e1e9; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .assistant-message.user { margin-left: 10%; background: #e4f3ee; }
+    .assistant-message strong { display: block; color: #0c776b; font-size: 12px; margin-bottom: 8px; }
+    .assistant-sources { border-top: 1px solid #d7e1e9; margin-top: 13px; padding-top: 9px; font-size: 13px; color: #45637a; }
+    .assistant-form { padding: 18px; background: #fff; border: 1px solid #d7e1e9; border-radius: 12px; }
+    .assistant-form label { display: block; font-weight: 700; margin-bottom: 9px; }
+    .assistant-form textarea { width: 100%; min-height: 90px; padding: 12px; border: 1px solid #b6c9d6; border-radius: 8px; font: inherit; resize: vertical; }
+    .assistant-form button { display: block; margin: 12px 0 0 auto; padding: 10px 20px; border: 0; border-radius: 8px; color: white; background: #0c776b; font: inherit; font-weight: 700; cursor: not-allowed; opacity: .55; }
+    .assistant-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; }
+    .assistant-controls label { margin: 0; }
+    .assistant-controls select, .assistant-controls input { display: block; margin-top: 5px; padding: 9px; border: 1px solid #b6c9d6; border-radius: 8px; font: inherit; }
+    .preview-note { padding: 12px 16px; border-radius: 8px; background: #fff3d6; border: 1px solid #e5c979; }
+  </style>
+</head>
+<body>
+  <main class="assistant-page">
+    <p class="preview-note"><strong>Prévia visual.</strong> Esta página não consulta o banco nem o modelo de IA.</p>
+    <div class="assistant-heading">
+      <h1>Assistente</h1>
+      <p>Faça perguntas sobre os lançamentos do dashboard ou consulte os documentos do projeto. Confira a origem exibida em cada resposta.</p>
+    </div>
+    <span class="assistant-status">Os números vêm dos lançamentos atuais do dashboard. O assistente não consulta empresas nem indicadores cruzados.</span>
+    <section class="assistant-messages" aria-label="Exemplo de conversa">
+      <article class="assistant-message user"><strong>VOCÊ</strong><div>Quais indicadores tiveram lançamentos neste mês?</div></article>
+      <article class="assistant-message"><strong>ASSISTENTE</strong><div>A resposta aparecerá aqui quando o sistema estiver ligado ao backend e ao Ollama.</div><div class="assistant-sources">Fontes: indicador, setor e período utilizados na resposta.</div></article>
+    </section>
+    <form class="assistant-form" onsubmit="return false">
+      <div class="assistant-controls">
+        <label for="assistant-mode">Consultar
+          <select id="assistant-mode"><option>Indicadores do dashboard</option><option>Documentos</option></select>
+        </label>
+        <label for="assistant-start">De<input id="assistant-start" type="date"></label>
+        <label for="assistant-end">Até<input id="assistant-end" type="date"></label>
+      </div>
+      <label for="assistant-question">Sua pergunta</label>
+      <textarea id="assistant-question" placeholder="Ex.: Quais indicadores tiveram lançamentos neste mês?"></textarea>
+      <button type="button" disabled>Perguntar</button>
+    </form>
+  </main>
+</body>
+</html>
