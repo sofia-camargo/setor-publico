@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores | Plataforma Inteligente</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="assets/js/logoBase64.js"></script>
+    <style>
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card-indicador { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .card-indicador:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); background: rgba(255,255,255,0.08); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .card-title { font-size: 1.1rem; font-weight: 600; color: #fff; line-height: 1.3; }
+        .card-value { font-size: 2.5rem; font-weight: bold; color: var(--status-green); margin: 1rem 0; display: flex; align-items:baseline; gap: 5px; }
+        .card-meta { font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .add-btn { background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .add-btn:hover { background: #1d4ed8; }
+        
+        .action-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box { background: #f8fafc; color: #333; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #eff6ff; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+        .close-btn:hover { color: #ef4444; }
+        
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+        .tab-btn { background: none; border: none; color: #94a3b8; font-size: 1.1rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; }
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .tab-btn.active { color: #fff; background: var(--primary-color); }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        table.light-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 1rem; }
+        table.light-table th, table.light-table td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        table.light-table th { background: #f1f5f9; color: #475569; font-weight: 600; }
+        table.light-table td { color: #334155; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" style="display: flex; align-items:center; gap: 10px;">
+                <img src="assets/img/logo_prefeitura.png" alt="Logo Prefeitura da Iracemápolis" style="height: 35px; width: auto; object-fit: contain;">
+                <span>SIGDEI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Painel de Controle</a></li>
+                <li><a href="oficios.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> Ofícios</a></li>
+                <li><a href="projetos.html" class="nav-link"><i class="fa-solid fa-project-diagram"></i> Projetos</a></li>
+                <li><a href="indicadores.html" class="nav-link active"><i class="fa-solid fa-chart-bar"></i> Indicadores</a></li>
+                
+                <li id="menu-usuarios" style="display:none;"><a href="usuarios.html" class="nav-link"><i class="fa-solid fa-users"></i> Usuários</a></li>
+                <li><a href="configuracoes.html" class="nav-link"><i class="fa-solid fa-gear"></i> Configurações</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header glass" style="padding: 1rem 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 class="page-title">Monitoramento de Indicadores</h2>
+                <div class="user-profile">
+                    <div class="user-info" style="text-align: right;">
+                        <h4 id="user-name">Carregando...</h4>
+                        <p id="user-role">Carregando...</p>
+                    </div>
+                    <div id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">-</div>
+                    <a href="#" id="logout-btn" style="color: var(--text-muted); margin-left: 1rem;" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+            </header>
+
+            <div id="alert-box" class="alert alert-success" style="display:none;"></div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab('geral', event)"><i class="fa-solid fa-table-cells-large"></i> Visão Geral</button>
+                <button class="tab-btn" onclick="openTab('add', event)"><i class="fa-solid fa-plus-circle"></i> Criar Indicador Base</button>
+                <button class="tab-btn" style="margin-left: auto; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5);" onclick="abrirModalRelatorio()" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='none'; this.style.color='#ef4444'"><i class="fa-solid fa-file-pdf"></i> Exportar Relatório</button>
+            </div>
+
+            <!-- TAB 1: VISÃO GERAL -->
+            <div id="tab-geral" class="tab-content active">
+                <div class="grid-cards" id="indicadores-container">
+                    <p style="color: white;">Carregando indicadores...</p>
+                </div>
+            </div>
+
+            <!-- TAB 2: CRIAR NOVO INDICADOR BASE -->
+            <div id="tab-add" class="tab-content glass" style="padding: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;"><i class="fa-solid fa-plus-circle"></i> Novo Indicador</h3>
+                <p style="margin-bottom: 1.5rem; color: #94a3b8;">Crie a métrica base. Você e sua equipe poderão adicionar valores (lançamentos) a ela na Visão Geral.</p>
+                <form id="form-indicador">
+                    <div class="form-group">
+                        <label class="form-label" for="nome_indicador">Nome do Indicador</label>
+                        <input type="text" id="nome_indicador" name="nome" class="form-control" placeholder="Ex: Atendimentos Diários" required style="background: #0d1a30;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tipo_indicador">Tipo de Dado</label>
+                        <select id="tipo_indicador" name="tipo" class="form-control" required style="background: #0d1a30;">
+                            <option value="Quantidade">Quantidade</option>
+                            <option value="Tempo">Tempo</option>
+                            <option value="Porcentagem">Porcentagem (%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group admin-only" style="display:none;">
+                        <label class="form-label" for="id_setor">Vincular ao Setor</label>
+                        <select id="id_setor" class="form-control" style="background: #0d1a30;">
+                            <option value="">Selecione um Setor (Obrigatório)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;"><i class="fa-solid fa-save"></i> Criar Indicador</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL HISTÓRICO -->
+    <div id="modal-historico" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-titulo" style="font-size: 1.25rem; font-weight: bold; color: #1e3a8a;"><i class="fa-solid fa-chart-line"></i> Histórico</h3>
+                <button class="close-btn" onclick="fecharModal('modal-historico')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 1.5rem; height: 300px; position: relative;">
+                    <h4 style="text-align: center; margin-bottom: 1rem; color: #333;"><i class="fa-solid fa-users"></i> Produção por Colaborador</h4>
+                    <canvas id="graficoHistorico"></canvas>
+                </div>
+                
+                <h4 style="margin-bottom: 1rem; color: #333;"><i class="fa-solid fa-list"></i> Histórico Detalhado</h4>
+                <table class="light-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Responsável</th>
+                            <th>Ação</th>
+                            <th style="text-align: right;">Valor</th>
+                            <th style="text-align: right;">Saldo Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-historico"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIÇÃO REMOVIDO -->
+
+    <!-- MODAL ADICIONAR VALOR (Lançamento Normal) -->
+    <div id="modal-adicionar-valor" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="modal-titulo-lancamento" style="font-size: 1.1rem; font-weight: bold; color: #1e3a8a;"><i class="fa-solid fa-plus-circle"></i> Novo Lançamento</h3>
+                <button class="close-btn" onclick="fecharModal('modal-adicionar-valor')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-adicionar-valor">
+                    <input type="hidden" id="lancamentoIdIndicador">
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">Quantidade/Valor Produzido:</label>
+                        <input type="number" step="0.01" id="lancamentoValor" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1.2rem;" required>
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: #333;">Data do Lançamento:</label>
+                        <input type="date" id="lancamentoData" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" required>
+                    </div>
+                    <button type="submit" style="width: 100%; background: var(--primary-color); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                        <i class="fa-solid fa-check"></i> Lançar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RELATÓRIO -->
+    <div id="modal-relatorio" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 style="font-size: 1.1rem; font-weight: bold; color: #1e3a8a;"><i class="fa-solid fa-file-pdf"></i> Exportar Relatório</h3>
+                <button class="close-btn" onclick="fecharModal('modal-relatorio')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-relatorio">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">Data Inicial:</label>
+                            <input type="date" id="relDataIni" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">Data Final:</label>
+                            <input type="date" id="relDataFim" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" required>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem; display: none;" class="admin-only" id="relSetorContainer">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">Setor:</label>
+                        <select id="relSetor" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;">
+                            <option value="todos">Todos os Setores</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">Indicador:</label>
+                        <select id="relIndicador" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;">
+                            <option value="todos">Todos os Indicadores</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" style="width: 100%; background: #ef4444; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-download"></i> Gerar PDF
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        const token = localStorage.getItem('jwt_token');
+        if (!token) window.location.href = 'index.html';
+        const user = JSON.parse(localStorage.getItem('user')) || { nome: '', nivel_acesso: '', id_setor: null };
+        
+        document.getElementById('user-name').textContent = user.nome;
+        document.getElementById('user-role').textContent = user.nivel_acesso;
+        document.getElementById('user-avatar').textContent = user.nome.charAt(0).toUpperCase();
+
+        if (user.nivel_acesso === 'Administrador' || user.nivel_acesso === 'Gestor') {
+            document.getElementById('menu-usuarios').style.display = 'block';
+        }
+        if (user.nivel_acesso === 'Administrador') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        const apiHeaders = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        let indicadoresData = [];
+        let setoresMap = {};
+        let usuariosMap = {};
+        let rawValores = [];
+        
+        function openTab(tabName, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            if (evt) {
+                evt.currentTarget.classList.add('active');
+            } else {
+                const btns = document.querySelectorAll('.tab-btn');
+                if (tabName === 'geral' && btns[0]) btns[0].classList.add('active');
+                if (tabName === 'add' && btns[1]) btns[1].classList.add('active');
+            }
+        }
+
+        async function init() {
+            try {
+                const setoresRes = await fetch('http://127.0.0.1:8000/api/v1/setores/', { headers: apiHeaders });
+                if (setoresRes.status === 401) {
+                    alert("Sua sessão expirou. Por favor, faça login novamente.");
+                    localStorage.removeItem('jwt_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                const usuariosRes = await fetch('http://127.0.0.1:8000/api/v1/usuarios/', { headers: apiHeaders });
+                const indicadoresRes = await fetch('http://127.0.0.1:8000/api/v1/indicadores/', { headers: apiHeaders });
+                const valoresRes = await fetch('http://127.0.0.1:8000/api/v1/atividades/', { headers: apiHeaders });
+                
+                const setores = await setoresRes.json();
+                const usuarios = await usuariosRes.json();
+                indicadoresData = await indicadoresRes.json();
+                rawValores = await valoresRes.json();
+
+                const selSetor = document.getElementById('id_setor');
+                const relSetor = document.getElementById('relSetor');
+                setores.forEach(s => {
+                    setoresMap[s.id_setor] = s.nome;
+                    if(selSetor) selSetor.innerHTML += `<option value="${s.id_setor}">${s.nome}</option>`;
+                    if(relSetor) relSetor.innerHTML += `<option value="${s.id_setor}">${s.nome}</option>`;
+                });
+                usuarios.forEach(u => usuariosMap[u.id_usuario] = u.nome);
+
+                renderIndicadores();
+                preencherFiltrosRelatorio();
+            } catch(e) { console.error(e); }
+        }
+
+        function preencherFiltrosRelatorio() {
+            const relInd = document.getElementById('relIndicador');
+            relInd.innerHTML = '<option value="todos">Todos os Indicadores</option>';
+            indicadoresData.forEach(ind => {
+                relInd.innerHTML += `<option value="${ind.id_indicador}">${ind.nome}</option>`;
+            });
+            const today = new Date().toISOString().split('T')[0];
+            const primeiroDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('relDataIni').value = primeiroDiaMes;
+            document.getElementById('relDataFim').value = today;
+        }
+
+        function formatData(dataStr) {
+            if(!dataStr) return '';
+            const [y, m, d] = dataStr.split('T')[0].split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function getSufixo(tipo) {
+            if (tipo === 'Porcentagem') return '%';
+            if (tipo === 'Tempo' || tipo === 'Horários') return 'h';
+            return '';
+        }
+
+        function renderIndicadores() {
+            const container = document.getElementById('indicadores-container');
+            container.innerHTML = '';
+
+            if (indicadoresData.length === 0) {
+                container.innerHTML = '<p style="color:white;">Nenhum indicador registrado.</p>';
+                return;
+            }
+
+            // Calcular totais no front
+            let totais = {};
+            rawValores.forEach(v => {
+                if(!totais[v.id_indicador]) totais[v.id_indicador] = 0;
+                
+                if (v.tipo_registro === 'ajuste') {
+                    totais[v.id_indicador] = parseFloat(v.valor); // Override
+                } else {
+                    totais[v.id_indicador] += parseFloat(v.valor);
+                }
+            });
+
+            indicadoresData.forEach(ind => {
+                const sfx = getSufixo(ind.tipo_dado);
+                const valorAtual = totais[ind.id_indicador] || 0;
+                
+                container.innerHTML += `
+                    <div class="card-indicador">
+                        <div class="card-header" style="align-items: center;">
+                            <h3 class="card-title">${ind.nome}</h3>
+                            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                <button title="Ver Histórico/Gráfico" style="background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 1.5rem; transition: color 0.2s, transform 0.2s;" onmouseover="this.style.color='var(--primary-color)'; this.style.transform='scale(1.1)'" onmouseout="this.style.color='rgba(255,255,255,0.6)'; this.style.transform='scale(1)'" onclick='abrirModalHistorico(${ind.id_indicador}, "${ind.nome}", "${sfx}")'>
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-meta" style="display:flex; justify-content:space-between; width:100%;">
+                            <span><i class="fa-solid fa-info-circle"></i> Tipo: ${ind.tipo_dado}</span>
+                            <span class="status-tag status-encerrado" style="font-size:0.75rem; padding: 2px 6px;">${setoresMap[ind.id_setor] || 'Sem Setor'}</span>
+                        </div>
+                        <div class="card-value">
+                            ${parseFloat(valorAtual).toLocaleString('pt-BR')} <span style="font-size: 1rem; color: rgba(255,255,255,0.5);">${sfx}</span>
+                        </div>
+                        
+                        <div class="action-row" style="margin-top: auto; padding-top: 1rem;">
+                            <button class="add-btn" style="width: 100%; display: flex; justify-content: center; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-size: 0.95rem; padding: 0.75rem;" onmouseover="this.style.background='var(--primary-color)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(59, 130, 246, 0.15)'; this.style.color='#60a5fa';" onclick="abrirModalLancamento(${ind.id_indicador}, '${ind.nome}')">
+                                <i class="fa-solid fa-plus"></i> Lançar Produção
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        let graficoModalInstancia = null;
+
+        async function abrirModalHistorico(id, nome, sufixo) {
+            document.getElementById('modal-titulo').innerText = nome;
+            const tbody = document.getElementById('tabela-historico');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Carregando histórico...</td></tr>';
+            document.getElementById('modal-historico').classList.add('active');
+
+            try {
+                let historico = rawValores.filter(v => v.id_indicador === id);
+                tbody.innerHTML = '';
+                let producao = {};
+
+                if (historico.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
+                } else {
+                    let saldoAcc = 0; 
+                    historico.forEach(v => {
+                        const isAjuste = v.tipo_registro === 'ajuste';
+                        if (isAjuste) {
+                            saldoAcc = parseFloat(v.valor);
+                        } else {
+                            saldoAcc += parseFloat(v.valor);
+                        }
+
+                        const acaoTag = isAjuste 
+                            ? '<span style="color:#d97706; font-weight:bold; font-size:0.8rem;"><i class="fa-solid fa-cog"></i> Ajuste</span>'
+                            : '<span style="color:#16a34a; font-weight:bold; font-size:0.8rem;"><i class="fa-solid fa-plus"></i> Adição</span>';
+                        
+                        const responsavelName = usuariosMap[v.id_usuario] || 'Desconhecido';
+                        const tdResponsavel = user.nivel_acesso === 'Usuário' ? '<td><span style="color: #94a3b8; font-style: italic;">Oculto</span></td>' : `<td><span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight:bold;">${responsavelName}</span></td>`;
+                        
+                        if(!isAjuste) {
+                            if(!producao[responsavelName]) producao[responsavelName] = 0;
+                            producao[responsavelName] += parseFloat(v.valor);
+                        }
+
+                        const displayLancado = isAjuste ? `<span style="font-size:0.8rem; color:#94a3b8;">Definido:</span> ${v.valor}` : `+${v.valor}`;
+                        
+                        // Actions se for o autor
+                        const actionBtns = (v.id_usuario === user.id_usuario) 
+                            ? `<button onclick="editarLancamento(${v.id}, ${v.valor})" style="background:none; border:none; color:#3b82f6; cursor:pointer; margin-left: 10px;" title="Editar meu lançamento"><i class="fa-solid fa-pen"></i></button>
+                               <button onclick="deletarLancamento(${v.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; margin-left: 10px;" title="Remover meu lançamento"><i class="fa-solid fa-trash"></i></button>`
+                            : '';
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${formatData(v.data_cadastro)}</td>
+                                ${tdResponsavel}
+                                <td>${acaoTag}${actionBtns}</td>
+                                <td style="text-align: right; font-weight: bold;">${displayLancado}${sufixo}</td>
+                                <td style="text-align: right; color: #1e40af; font-weight: bold; background: #eff6ff;">${saldoAcc}${sufixo}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                // Renderizar Gráfico
+                const chartContainer = document.getElementById('graficoHistorico').parentElement;
+                if (user.nivel_acesso === 'Usuário') {
+                    chartContainer.style.display = 'none';
+                } else {
+                    chartContainer.style.display = 'block';
+                    const ctx = document.getElementById('graficoHistorico').getContext('2d');
+                    if (graficoModalInstancia) graficoModalInstancia.destroy();
+                
+                const autores = Object.keys(producao);
+                const quantidades = Object.values(producao);
+                
+                if (autores.length === 0) {
+                    graficoModalInstancia = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels: ['Sem dados'], datasets: [{ data: [0], backgroundColor: '#e2e8f0' }] },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                } else {
+                    const barColors = ['rgba(236, 72, 153, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(245, 158, 11, 0.7)'];
+                    graficoModalInstancia = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: autores,
+                            datasets: [{
+                                label: 'Lançamentos',
+                                data: quantidades,
+                                backgroundColor: barColors,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { 
+                                y: { beginAtZero: true, ticks: { callback: function(value) { return value + sufixo; } } } 
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+                } // Fechando o else do user.nivel_acesso
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.abrirModalLancamento = function(id, nome) {
+            document.getElementById('lancamentoIdIndicador').value = id;
+            document.getElementById('modal-titulo-lancamento').innerText = "Novo Lançamento - " + nome;
+            const today = new Date().toISOString().split('T')[0]; document.getElementById('lancamentoData').value = today; document.getElementById('lancamentoData').max = today;
+            document.getElementById('modal-adicionar-valor').classList.add('active');
+        }
+
+        window.abrirModalEdicao = function(id, valorAtual) {
+            document.getElementById('ajusteIdIndicador').value = id;
+            document.getElementById('ajusteValor').value = valorAtual;
+            const today2 = new Date().toISOString().split('T')[0]; document.getElementById('ajusteData').value = today2; document.getElementById('ajusteData').max = today2;
+            document.getElementById('modal-edicao').classList.add('active');
+        }
+
+        window.abrirModalRelatorio = function() {
+            if (user.nivel_acesso === 'Administrador') {
+                document.getElementById('relSetorContainer').style.display = 'block';
+            }
+            document.getElementById('modal-relatorio').classList.add('active');
+        }
+
+        window.fecharModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function mostrarAlerta(msg) {
+            const box = document.getElementById('alert-box');
+            box.textContent = msg;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 3000);
+        }
+
+        // Criar Indicador Base
+        document.getElementById('form-indicador').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let idSetorParsed = user.id_setor;
+            if (user.nivel_acesso === 'Administrador') {
+                const el = document.getElementById('id_setor');
+                idSetorParsed = el && el.value ? parseInt(el.value) : null;
+            }
+
+            const body = {
+                nome: document.getElementById('nome_indicador').value,
+                tipo_dado: document.getElementById('tipo_indicador').value,
+                id_setor: idSetorParsed || null
+            };
+            
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/v1/indicadores/', { method: 'POST', headers: apiHeaders, body: JSON.stringify(body) });
+                if (res.status === 401) {
+                    alert("Sua sessão expirou. Faça login novamente.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+                if (res.ok) {
+                    mostrarAlerta("Indicador Base criado com sucesso!");
+                    e.target.reset();
+                    init();
+                    openTab('geral');
+                } else {
+                    const err = await res.json();
+                    alert("Erro ao criar Indicador. Detalhes: " + (err.detail || JSON.stringify(err)));
+                }
+            } catch(e) {
+                alert("Erro de conexão ao criar Indicador.");
+            }
+        });
+
+        // Adicionar Valor (Lançamento)
+        document.getElementById('form-adicionar-valor').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const idIndicador = document.getElementById('lancamentoIdIndicador').value;
+            const valor = document.getElementById('lancamentoValor').value;
+            const dataRegistro = document.getElementById('lancamentoData').value;
+            
+            try {
+                const body = {
+                    id_indicador: parseInt(idIndicador),
+                    id_usuario: user.id_usuario,
+                    valor: valor,
+                    data_cadastro: dataRegistro,
+                    tipo_registro: 'lancamento'
+                };
+                const res = await fetch('http://127.0.0.1:8000/api/v1/atividades/', { method: 'POST', headers: apiHeaders, body: JSON.stringify(body) });
+                if (res.status === 401) {
+                    alert("Sua sessão expirou. Faça login novamente.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+                mostrarAlerta("Produção lançada!");
+                fecharModal('modal-adicionar-valor');
+                e.target.reset();
+                init();
+            } catch(e) {}
+        });
+
+        window.editarLancamento = async function(id, valorAtual) {
+            const novoValor = prompt("Digite o novo valor para este lançamento:", valorAtual);
+            if(novoValor === null) return;
+            const floatVal = parseFloat(novoValor.replace(',', '.'));
+            if(isNaN(floatVal)) {
+                alert("Valor numérico inválido.");
+                return;
+            }
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/atividades/${id}/`, { method: 'PATCH', headers: apiHeaders, body: JSON.stringify({ valor: floatVal }) });
+                if(res.ok) {
+                    mostrarAlerta("Lançamento atualizado com sucesso!");
+                    fecharModal('modal-historico');
+                    init();
+                } else {
+                    alert("Erro ao atualizar lançamento.");
+                }
+            } catch(e) {
+                alert("Erro de conexão.");
+            }
+        }
+
+        window.deletarLancamento = async function(id) {
+            if(!confirm("Tem certeza que deseja remover este lançamento? O total do indicador será recalculado.")) return;
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/atividades/${id}/`, { method: 'DELETE', headers: apiHeaders });
+                if(res.ok) {
+                    mostrarAlerta("Lançamento removido com sucesso!");
+                    fecharModal('modal-historico');
+                    init();
+                } else {
+                    alert("Erro ao remover lançamento.");
+                }
+            } catch(e) {
+                alert("Erro de conexão.");
+            }
+        }
+        
+        // Gerar Relatório PDF
+        document.getElementById('form-relatorio').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dataIni = document.getElementById('relDataIni').value;
+            const dataFim = document.getElementById('relDataFim').value;
+            const setorFiltro = document.getElementById('relSetor').value;
+            const indFiltro = document.getElementById('relIndicador').value;
+            
+            // Filtrar Registros
+            let registrosFiltrados = rawValores.filter(v => {
+                const isDateInRange = v.data_cadastro >= dataIni && v.data_cadastro <= dataFim;
+                if(!isDateInRange) return false;
+                
+                if (indFiltro !== 'todos' && v.id_indicador.toString() !== indFiltro) return false;
+                
+                const indBase = indicadoresData.find(i => i.id_indicador === v.id_indicador);
+                if (!indBase) return false;
+                
+                const setorConsiderado = (user.nivel_acesso === 'Administrador' && setorFiltro !== 'todos') 
+                                        ? setorFiltro 
+                                        : (user.nivel_acesso !== 'Administrador' ? user.id_setor.toString() : 'todos');
+                
+                if (setorConsiderado !== 'todos' && indBase.id_setor.toString() !== setorConsiderado) return false;
+                
+                return true;
+            });
+            
+            // Resumo
+            let resumoMap = {};
+            registrosFiltrados.forEach(v => {
+                const indBase = indicadoresData.find(i => i.id_indicador === v.id_indicador);
+                if(!resumoMap[v.id_indicador]) {
+                    resumoMap[v.id_indicador] = {
+                        nome: indBase ? indBase.nome : 'Desconhecido',
+                        tipo: indBase ? indBase.tipo_dado : '',
+                        setor: indBase ? (setoresMap[indBase.id_setor] || '') : '',
+                        soma: 0,
+                        qtd: 0,
+                        sufixo: indBase ? getSufixo(indBase.tipo_dado) : ''
+                    };
+                }
+                resumoMap[v.id_indicador].soma += parseFloat(v.valor);
+                resumoMap[v.id_indicador].qtd++;
+            });
+            
+            // Montar PDF usando jsPDF + autoTable
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
+            
+            // Logo
+            if (typeof LOGO_BASE64 !== 'undefined') {
+                // Dimensões originais costumam ser proporcionais, ajustando para 45x50 para não distorcer o brasão
+                doc.addImage(LOGO_BASE64, 'PNG', 40, 25, 45, 55);
+            }
+            
+            // Cabecalho
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("PREFEITURA MUNICIPAL DE IRACEMÁPOLIS", doc.internal.pageSize.getWidth()/2, 50, {align: 'center'});
+            doc.setFontSize(12);
+            doc.text("Relatório Geral de Indicadores de Desempenho (SIGDEI)", doc.internal.pageSize.getWidth()/2, 70, {align: 'center'});
+            
+            doc.setDrawColor(200);
+            doc.line(40, 85, doc.internal.pageSize.getWidth() - 40, 85);
+            
+            // Barra de Filtros
+            doc.setFillColor(239, 246, 255); // #eff6ff
+            doc.rect(40, 100, doc.internal.pageSize.getWidth() - 80, 25, 'F');
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            const nomeSetor = setorFiltro === 'todos' ? 'Todos os Setores' : setoresMap[setorFiltro];
+            const nomeInd = indFiltro === 'todos' ? 'Todos os Indicadores' : indicadoresData.find(i=>i.id_indicador.toString()===indFiltro)?.nome;
+            doc.text(`Período: ${formatData(dataIni)} a ${formatData(dataFim)} | Setor: ${nomeSetor} | Indicador: ${nomeInd}`, doc.internal.pageSize.getWidth()/2, 117, {align: 'center'});
+            
+            // Tabela 1: Resumo
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("1. Resumo dos Indicadores no Período", 40, 155);
+            
+            const resumoRows = Object.values(resumoMap).map(r => [
+                r.nome, 
+                r.setor,
+                r.tipo, 
+                r.soma.toFixed(2) + r.sufixo, 
+                r.qtd.toString()
+            ]);
+            
+            doc.autoTable({
+                startY: 165,
+                head: [['Indicador', 'Setor', 'Tipo de Dado', 'Total Lançado (Soma)', 'Qtd Lançamentos']],
+                body: resumoRows,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                styles: { fontSize: 9 }
+            });
+            
+            // Tabela 2: Histórico Detalhado
+            let finalY = doc.lastAutoTable.finalY + 30;
+            if(finalY > 700) { doc.addPage(); finalY = 50; }
+            
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("2. Histórico de Registros no Período", 40, finalY);
+            
+            const historicoRows = registrosFiltrados.sort((a,b) => new Date(b.data_cadastro) - new Date(a.data_cadastro)).map(v => {
+                const indBase = indicadoresData.find(i => i.id_indicador === v.id_indicador);
+                const sfx = indBase ? getSufixo(indBase.tipo_dado) : '';
+                const setorStr = indBase ? (setoresMap[indBase.id_setor] || '') : '';
+                return [
+                    formatData(v.data_cadastro),
+                    indBase ? indBase.nome : 'Desconhecido',
+                    usuariosMap[v.id_usuario] || 'Desconhecido',
+                    setorStr,
+                    (v.valor > 0 ? '+' : '') + parseFloat(v.valor).toFixed(2) + sfx
+                ];
+            });
+            
+            doc.autoTable({
+                startY: finalY + 10,
+                head: [['Data', 'Indicador', 'Colaborador', 'Setor', 'Valor']],
+                body: historicoRows,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                styles: { fontSize: 9 }
+            });
+            
+            doc.save(`Relatorio_Indicadores_${dataIni}_a_${dataFim}.pdf`);
+            fecharModal('modal-relatorio');
+        });
+
+        init();
+    </script>
+</body>
+</html>

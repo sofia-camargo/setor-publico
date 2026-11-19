@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Plataforma Inteligente</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card glass">
+            <img src="assets/img/logo_prefeitura.png" alt="Logo Prefeitura" style="width: 130px; display: block; margin: 0 auto 1.5rem;">
+            <h1>S.I.G.D.E.I</h1>
+            <p>Sistema Integrado de Gestão do Desenvolvimento Econômico de Iracemápolis</p>
+            
+            <div id="alert-box" class="alert alert-error" style="display: none;"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="matricula">Matrícula</label>
+                    <input type="text" id="matricula" name="matricula" class="form-control" required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Entrar no Sistema</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Se já estiver logado, vai direto pro dashboard
+        if (localStorage.getItem('jwt_token')) {
+            window.location.href = 'dashboard.html';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const matricula = document.getElementById('matricula').value;
+            const senha = document.getElementById('senha').value;
+            const alertBox = document.getElementById('alert-box');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v1/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ matricula, senha })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Salvar o Token e os dados do usuario no LocalStorage
+                    localStorage.setItem('jwt_token', data.access);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirecionar para o dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alertBox.textContent = data.error || 'Credenciais inválidas.';
+                    alertBox.style.display = 'block';
+                }
+            } catch (err) {
+                alertBox.textContent = 'Erro ao conectar com a API (O servidor Django está rodando?).';
+                alertBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários | Plataforma Inteligente</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .form-control { background: #0d1a30; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box { background: #f8fafc; color: #333; width: 90%; max-width: 400px; max-height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #eff6ff; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+        .close-btn:hover { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" style="display: flex; align-items:center; gap: 10px;">
+                <img src="assets/img/logo_prefeitura.png" alt="Logo Prefeitura da Iracemápolis" style="height: 35px; width: auto; object-fit: contain;">
+                <span>SIGDEI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Painel de Controle</a></li>
+                <li><a href="oficios.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> Ofícios</a></li>
+                <li><a href="projetos.html" class="nav-link"><i class="fa-solid fa-project-diagram"></i> Projetos</a></li>
+                <li><a href="indicadores.html" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Indicadores</a></li>
+                
+                <li><a href="usuarios.html" class="nav-link active"><i class="fa-solid fa-users"></i> Usuários</a></li>
+                <li><a href="configuracoes.html" class="nav-link"><i class="fa-solid fa-gear"></i> Configurações</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header glass" style="padding: 1rem 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 class="page-title">Gerenciamento de Usuários</h2>
+                <div class="user-profile">
+                    <div class="user-info" style="text-align: right;">
+                        <h4 id="user-name">Carregando...</h4>
+                        <p id="user-role">Carregando...</p>
+                    </div>
+                    <div id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">-</div>
+                    <a href="#" id="logout-btn" style="color: var(--text-muted); margin-left: 1rem;" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+            </header>
+
+            <div id="alert-box" class="alert alert-success" style="display:none;"></div>
+
+            <!-- Formulário de Cadastro (Apenas Administradores) -->
+            <div id="painel-cadastro" class="glass admin-only" style="padding: 2rem; margin-bottom: 2rem; display:none;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;"><i class="fa-solid fa-user-plus"></i> Novo Usuário</h3>
+                <form id="form-cadastro">
+                    <div class="grid-form">
+                        <div class="form-group">
+                            <label class="form-label" for="matricula">Matrícula</label>
+                            <input type="text" id="matricula" name="matricula" class="form-control" required style="background: #0d1a30;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="nome">Nome Completo</label>
+                            <input type="text" id="nome" name="nome" class="form-control" required style="background: #0d1a30;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="funcao">Função/Cargo</label>
+                            <input type="text" id="funcao" name="funcao" class="form-control" required style="background: #0d1a30;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="id_setor">Setor</label>
+                            <select id="id_setor" name="id_setor" class="form-control" required style="background: #0d1a30;"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="nivel_acesso">Nível de Acesso</label>
+                            <select id="nivel_acesso" name="nivel_acesso" class="form-control" required style="background: #0d1a30;">
+                                <option value="Colaborador">Colaborador</option>
+                                <option value="Gestor">Gestor</option>
+                                <option value="Administrador">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="senha">Senha Temporária</label>
+                            <input type="password" id="senha" name="senha" class="form-control" placeholder="Min 6 chars" required style="background: #0d1a30;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: auto; margin-top: 1rem;"><i class="fa-solid fa-user-plus"></i> Cadastrar Usuário</button>
+                </form>
+            </div>
+
+            <!-- FILTRO DE BUSCA -->
+            <div class="glass" style="padding: 2rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;"><i class="fa-solid fa-magnifying-glass"></i> Consultar Usuários</h3>
+                <form id="form-busca" style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label" for="search">Pesquisar por Nome ou Matrícula</label>
+                        <input type="text" id="search" name="search" class="form-control" placeholder="Digite o nome ou a matrícula..." style="background: #0d1a30;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: auto;"><i class="fa-solid fa-search"></i> Buscar</button>
+                    <button type="button" onclick="limparBusca()" id="btn-limpar" class="btn" style="width: auto; background: var(--status-grey); color: white; display: none; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-solid fa-eraser"></i> Limpar</button>
+                </form>
+            </div>
+
+            <div class="glass" style="padding: 2rem;">
+                <h3 id="lista-titulo" style="margin-bottom: 1rem; font-size: 1.2rem;">Lista de Usuários</h3>
+                <div class="table-container">
+                    <table class="data-table" id="table-usuarios">
+                        <thead>
+                            <tr>
+                                <th>Matrícula</th>
+                                <th>Nome</th>
+                                <th>Função</th>
+                                <th>Setor</th>
+                                <th>Nível</th>
+                                <th class="admin-only" style="display:none;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody><tr><td colspan="6" style="text-align: center;">Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL REDEFINIR SENHA -->
+    <div id="modal-senha" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header" style="background: #fefce8; border-bottom-color: #fef08a;">
+                <h3 style="font-size: 1.1rem; font-weight: bold; color: #854d0e;"><i class="fa-solid fa-key"></i> Redefinir Senha</h3>
+                <button class="close-btn" onclick="fecharModal()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem;">Definir nova senha para o usuário <strong id="nome_usuario_modal"></strong>.</p>
+                <form id="form-reset">
+                    <input type="hidden" id="id_usuario_reset">
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">Nova Senha:</label>
+                        <input type="password" id="nova_senha_reset" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;" placeholder="Min 6 chars" required>
+                    </div>
+                    <button type="submit" style="width: 100%; background: #eab308; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                        <i class="fa-solid fa-check"></i> Salvar Nova Senha
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('jwt_token');
+        if (!token) window.location.href = 'index.html';
+        const user = JSON.parse(localStorage.getItem('user')) || { nome: '', nivel_acesso: '', id_setor: null };
+        
+        document.getElementById('user-name').textContent = user.nome;
+        document.getElementById('user-role').textContent = user.nivel_acesso;
+        document.getElementById('user-avatar').textContent = user.nome.charAt(0).toUpperCase();
+
+        if (user.nivel_acesso !== 'Administrador' && user.nivel_acesso !== 'Gestor') {
+            window.location.href = 'dashboard.html';
+        }
+        
+        if (user.nivel_acesso === 'Administrador') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            document.getElementById('lista-titulo').innerText = 'Lista de Usuários';
+        } else {
+            document.getElementById('lista-titulo').innerText = 'Lista de Usuários do Setor';
+            // Wait, we need to inject the sector name. Handled in init.
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        const apiHeaders = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        
+        let usuariosList = [];
+        let setoresMap = {};
+
+        async function init() {
+            try {
+                const [setoresRes, usuariosRes] = await Promise.all([
+                    fetch('http://127.0.0.1:8000/api/v1/setores/', { headers: apiHeaders }),
+                    fetch('http://127.0.0.1:8000/api/v1/usuarios/', { headers: apiHeaders })
+                ]);
+                
+                const setores = await setoresRes.json();
+                let usuarios = await usuariosRes.json();
+
+                const selSetor = document.getElementById('id_setor');
+                const filterSetor = document.getElementById('filter_setor');
+                if(selSetor) selSetor.innerHTML = '';
+                setores.forEach(s => {
+                    setoresMap[s.id_setor] = s.nome;
+                    if(selSetor) selSetor.innerHTML += `<option value="${s.id_setor}">${s.nome}</option>`;
+                    if(filterSetor) filterSetor.innerHTML += `<option value="${s.id_setor}">${s.nome}</option>`;
+                });
+                
+                if (user.nivel_acesso === 'Gestor') {
+                    document.getElementById('lista-titulo').innerText = 'Lista de Usuários do Setor: ' + (setoresMap[user.id_setor] || '');
+                    usuarios = usuarios.filter(u => u.id_setor === user.id_setor);
+                }
+                
+                usuariosList = usuarios;
+                renderUsuarios();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderUsuarios() {
+            const tbody = document.querySelector('#table-usuarios tbody');
+            tbody.innerHTML = '';
+            
+            const termo = document.getElementById('search').value.toLowerCase();
+            const fSetor = document.getElementById('filter_setor').value;
+            
+            if(termo || fSetor !== 'todos') {
+                document.getElementById('btn-limpar').style.display = 'inline-flex';
+            } else {
+                document.getElementById('btn-limpar').style.display = 'none';
+            }
+
+            let filtrados = usuariosList;
+            if (termo) {
+                filtrados = filtrados.filter(u => u.nome.toLowerCase().includes(termo) || u.matricula.toLowerCase().includes(termo));
+            }
+            if (fSetor !== 'todos') {
+                filtrados = filtrados.filter(u => u.id_setor.toString() === fSetor);
+            }
+
+            if(filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${user.nivel_acesso === 'Administrador' ? 6 : 5}" style="text-align: center; color: var(--text-muted);">Nenhum usuário encontrado.</td></tr>`;
+                return;
+            }
+
+            filtrados.forEach(u => {
+                const nomeSetor = setoresMap[u.id_setor] || 'Desconhecido';
+                
+                let nivelHtml = u.nivel_acesso;
+                if(u.nivel_acesso === 'Administrador') {
+                    nivelHtml = `<span style="color: var(--status-green); font-weight: bold;"><i class="fa-solid fa-shield-halved"></i> Admin</span>`;
+                }
+
+                let acoesHtml = '';
+                // Admin e Gestor podem redefinir senha (RN03)
+                if (user.nivel_acesso === 'Administrador' || (user.nivel_acesso === 'Gestor' && u.id_setor === user.id_setor)) {
+                    acoesHtml += `<button class="btn btn-sm" style="background: var(--status-yellow); color: #000; margin-right: 4px;" onclick="abrirModalSenha(${u.id_usuario}, '${u.nome}')" title="Redefinir Senha"><i class="fa-solid fa-key"></i></button>`;
+                }
+                // Apenas Admin pode excluir (RN01)
+                if (user.nivel_acesso === 'Administrador') {
+                    acoesHtml += `<button class="btn btn-sm" style="background: var(--status-red); color: #fff;" onclick="excluirUsuario(${u.id_usuario})" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
+                }
+                acoesHtml = `<td>${acoesHtml}</td>`;
+                
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${u.matricula}</td>
+                        <td><strong>${u.nome}</strong></td>
+                        <td>${u.funcao}</td>
+                        <td><span class="status-tag status-encerrado">${nomeSetor}</span></td>
+                        <td>${nivelHtml}</td>
+                        ${acoesHtml}
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('form-busca').addEventListener('submit', (e) => {
+            e.preventDefault();
+            renderUsuarios();
+        });
+
+        window.limparBusca = function() {
+            document.getElementById('search').value = '';
+            document.getElementById('filter_setor').value = 'todos';
+            renderUsuarios();
+        }
+
+        window.abrirModalSenha = function(id, nome) {
+            document.getElementById('id_usuario_reset').value = id;
+            document.getElementById('nome_usuario_modal').innerText = nome;
+            document.getElementById('modal-senha').classList.add('active');
+        }
+
+        window.fecharModal = function() {
+            document.getElementById('modal-senha').classList.remove('active');
+        }
+
+        function mostrarAlerta(msg, isError=false) {
+            const box = document.getElementById('alert-box');
+            box.className = isError ? 'alert alert-error' : 'alert alert-success';
+            box.textContent = msg;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 3000);
+        }
+
+        document.getElementById('form-cadastro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const body = {
+                matricula: document.getElementById('matricula').value,
+                nome: document.getElementById('nome').value,
+                funcao: document.getElementById('funcao').value,
+                id_setor: document.getElementById('id_setor').value,
+                nivel_acesso: document.getElementById('nivel_acesso').value,
+                senha: document.getElementById('senha').value
+            };
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/v1/usuarios/', { method: 'POST', headers: apiHeaders, body: JSON.stringify(body) });
+                if(res.ok) {
+                    mostrarAlerta('Usuário cadastrado com sucesso!');
+                    e.target.reset();
+                    init();
+                } else {
+                    const error = await res.json();
+                    mostrarAlerta("Erro ao cadastrar: " + JSON.stringify(error), true);
+                }
+            } catch(e) {}
+        });
+
+        window.excluirUsuario = async function(id) {
+            if(!confirm("Tem certeza que deseja excluir este usurio?")) return;
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/usuarios/${id}/`, { method: 'DELETE', headers: apiHeaders });
+                if(res.ok) {
+                    mostrarAlerta('Usurio excludo!');
+                    init();
+                } else {
+                    mostrarAlerta('Erro ao excluir', true);
+                }
+            } catch(e) {}
+        }
+
+        document.getElementById('form-reset').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('id_usuario_reset').value;
+            const senha = document.getElementById('nova_senha_reset').value;
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/usuarios/redefinir-senha/`, { 
+                    method: 'POST', 
+                    headers: apiHeaders, 
+                    body: JSON.stringify({
+                        user_id_alvo: id,
+                        user_id_admin: user.id_usuario,
+                        nova_senha: senha
+                    }) 
+                });
+                if(res.ok) {
+                    mostrarAlerta('Senha redefinida com sucesso!');
+                    fecharModal();
+                    e.target.reset();
+                } else {
+                    const err = await res.json();
+                    mostrarAlerta("Erro: " + JSON.stringify(err), true);
+                }
+            } catch(e) {}
+        });
+
+        init();
+    </script>
+</body>
+</html>
