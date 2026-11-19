@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GAFIA · Consulta a documentos</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="eyebrow">GAFIA · SERVIDOR LOCAL</div>
+      <h1>Consulta a documentos</h1>
+      <p>Faça perguntas sobre os arquivos indexados. Confira as fontes antes de usar a resposta.</p>
+    </header>
+    <section class="panel" aria-label="Configuração e estado">
+      <label for="token">Token de acesso (se configurado no servidor)</label>
+      <input id="token" type="password" autocomplete="off" placeholder="Opcional para acesso neste computador">
+      <span id="status" role="status">Verificando índice…</span>
+    </section>
+    <section id="messages" class="messages" aria-live="polite"></section>
+    <form id="chat-form">
+      <label for="question">Sua pergunta</label>
+      <textarea id="question" maxlength="2000" rows="3" required placeholder="Ex.: O que o relatório diz sobre os indicadores de 2026?"></textarea>
+      <button id="send" type="submit">Perguntar</button>
+    </form>
+    <footer>O modelo roda localmente. Arquivos novos ou alterados precisam ser reindexados.</footer>
+  </main>
+</body>
+</html>

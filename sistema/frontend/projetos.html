@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetos | Plataforma Inteligente</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .form-control { background: #064a7d; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box { background: #ffffff; color: #26364a; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid #dce6ec; display: flex; justify-content: space-between; align-items: center; background: #eef6fb; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #657487; }
+        .close-btn:hover { color: #ef4444; }
+        
+        .action-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; transition: background 0.2s; color: var(--text-color); }
+        .action-btn:hover { background: rgba(255,255,255,0.2); }
+        
+        table.light-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 1rem; }
+        table.light-table th, table.light-table td { padding: 0.75rem; border-bottom: 1px solid #dce6ec; text-align: left; }
+        table.light-table th { background: #f3f7fa; color: #465569; font-weight: 600; }
+        table.light-table td { color: #26364a; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" style="display: flex; align-items:center; gap: 10px;">
+                <img src="assets/img/logo_prefeitura.png" alt="Logo Prefeitura da Iracemápolis" style="height: 35px; width: auto; object-fit: contain;">
+                <span>SIGDEI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Painel de Controle</a></li>
+                <li><a href="oficios.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> Ofícios</a></li>
+                <li><a href="projetos.html" class="nav-link active"><i class="fa-solid fa-project-diagram"></i> Projetos</a></li>
+                <li><a href="indicadores.html" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Indicadores</a></li>
+                
+                <li id="menu-usuarios" style="display:none;"><a href="usuarios.html" class="nav-link"><i class="fa-solid fa-users"></i> Usuários</a></li>
+                <li><a href="configuracoes.html" class="nav-link"><i class="fa-solid fa-gear"></i> Configurações</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header glass" style="padding: 1rem 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 class="page-title">Gerenciamento de Projetos</h2>
+                <div class="user-profile">
+                    <div class="user-info" style="text-align: right;">
+                        <h4 id="user-name">Carregando...</h4>
+                        <p id="user-role">Carregando...</p>
+                    </div>
+                    <div id="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">-</div>
+                    <a href="#" id="logout-btn" style="color: var(--text-muted); margin-left: 1rem;" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+            </header>
+
+            <div id="alert-box" class="alert alert-success" style="display: none;"></div>
+
+            <div class="glass" style="padding: 2rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;"><i class="fa-solid fa-plus-circle"></i> Cadastrar Novo Projeto</h3>
+                <form id="form-projeto">
+                    <div class="grid-form">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label" for="nome">Nome do Projeto</label>
+                            <input type="text" id="nome" name="nome" class="form-control" required style="background: #064a7d;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="data_inicio">Data de Início</label>
+                            <input type="date" id="data_inicio" name="data_inicio" class="form-control" required style="background: #064a7d;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="data_fim">Data Final (Prevista/Concluída)</label>
+                            <input type="date" id="data_fim" name="data_fim" class="form-control" required style="background: #064a7d;">
+                        </div>
+<!-- Status Removido do Form (assumirá 'Em andamento' por padrão) -->
+                        <div class="form-group">
+                            <label class="form-label" for="prioridade">Prioridade</label>
+                            <select id="prioridade" name="prioridade" class="form-control" required style="background: #064a7d;">
+                                <option value="Alta">Alta</option>
+                                <option value="Média">Média</option>
+                                <option value="Baixa">Baixa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="id_responsavel_nome">Líder / Responsável Principal</label>
+                            <select id="id_responsavel_nome" name="id_responsavel_nome" class="form-control" required style="background: #064a7d;"></select>
+                        </div>
+                        <div class="form-group admin-only" id="div_setor" style="display:none;">
+                            <label class="form-label" for="id_setor">Setor Responsável</label>
+                            <select id="id_setor" name="id_setor" class="form-control" style="background: #064a7d;"></select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: auto; margin-top: 1rem;"><i class="fa-solid fa-save"></i> Salvar Projeto</button>
+                </form>
+            </div>
+
+            <div class="glass" style="padding: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">Lista de Projetos</h3>
+                <div class="table-container">
+                    <table class="data-table" id="table-projetos">
+                        <thead>
+                            <tr>
+                                <th>Projeto</th>
+                                <th>Período</th>
+                                <th>Status</th>
+                                <th>Prioridade</th>
+                                <th>Responsável</th>
+                                <th class="admin-only" style="display:none;">Setor</th>
+                                <th style="text-align: center;">Tarefas / Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody><tr><td colspan="7" style="text-align:center;">Carregando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL TAREFAS -->
+    <div id="modal-tarefas" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-titulo" style="font-size: 1.25rem; font-weight: bold; color: #064a7d;"><i class="fa-solid fa-project-diagram"></i> Projeto: </h3>
+                    <p style="font-size: 0.85rem; color: #657487;">Visualize e gerencie a lista de atividades deste projeto</p>
+                </div>
+                <button class="close-btn" onclick="fecharModal()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #f3f7fa; padding: 1.25rem; border-radius: 8px; border: 1px solid #cbd8e1; margin-bottom: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; color: #26364a; font-size: 1rem;"><i class="fa-solid fa-plus-circle"></i> Adicionar Nova Tarefa</h4>
+                    <form id="form-tarefa">
+                        <input type="hidden" id="modal_id_projeto">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.25rem; color: #465569;">Nome da Tarefa</label>
+                                <input type="text" id="nome_tarefa" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd8e1; border-radius: 6px; font-size: 0.875rem;" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.25rem; color: #465569;">Responsável</label>
+                                <input type="text" id="responsavel_nome_tarefa" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd8e1; border-radius: 6px; font-size: 0.875rem;" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.25rem; color: #465569;">Data de Início</label>
+                                <input type="date" id="data_inicio_tarefa" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd8e1; border-radius: 6px; font-size: 0.875rem;" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.25rem; color: #465569;">Data Final</label>
+                                <input type="date" id="data_fim_tarefa" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd8e1; border-radius: 6px; font-size: 0.875rem;" required>
+                            </div>
+                            <div style="margin-bottom: 0;">
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.55rem; font-size: 0.875rem; background-color: var(--status_tag-green);">
+                                    <i class="fa-solid fa-check"></i> Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <h4 style="color: #26364a; margin-bottom: 0.75rem;"><i class="fa-solid fa-tasks"></i> Lista de Tarefas</h4>
+                <div style="overflow-x: auto;">
+                    <table class="light-table" style="margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 50px;">Status</th>
+                                <th>Nome da Tarefa</th>
+                                <th>Responsável</th>
+                                <th>Início</th>
+                                <th>Fim</th>
+                                <th style="text-align: center; width: 80px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-tarefas"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('jwt_token');
+        if (!token) window.location.href = 'index.html';
+        const user = JSON.parse(localStorage.getItem('user')) || { nome: '', nivel_acesso: '', id_setor: null };
+        
+        document.getElementById('user-name').textContent = user.nome;
+        document.getElementById('user-role').textContent = user.nivel_acesso;
+        document.getElementById('user-avatar').textContent = user.nome.charAt(0).toUpperCase();
+
+        if (user.nivel_acesso === 'Administrador' || user.nivel_acesso === 'Gestor') {
+            document.getElementById('menu-usuarios').style.display = 'block';
+        }
+        if (user.nivel_acesso === 'Administrador') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        const apiHeaders = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        
+        let projetosList = [];
+        let setoresMap = {};
+        let usuariosMap = {};
+        let openProjectRows = new Set();
+
+        function formatData(dataStr) {
+            if(!dataStr) return '';
+            const [y, m, d] = dataStr.split('T')[0].split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function getStatusClass(status_tag) {
+            switch (status_tag) {
+                case 'Em andamento': return 'status_tag-andamento';
+                case 'Concluído': return 'status_tag-concluido';
+                case 'Atrasado': return 'status_tag-atrasado';
+                default: return 'status_tag-encerrado';
+            }
+        }
+
+        async function init() {
+            try {
+                const [setoresRes, usuariosRes, projetosRes] = await Promise.all([
+                    fetch(`http://${window.location.hostname}:8000/api/v1/setores/`, { headers: apiHeaders }),
+                    fetch(`http://${window.location.hostname}:8000/api/v1/usuarios/`, { headers: apiHeaders }),
+                    fetch(`http://${window.location.hostname}:8000/api/v1/projetos/`, { headers: apiHeaders })
+                ]);
+                
+                const setores = await setoresRes.json();
+                const usuarios = await usuariosRes.json();
+                let projetos = await projetosRes.json();
+
+                const selSetor = document.getElementById('id_setor');
+                setores.forEach(s => {
+                    setoresMap[s.id_setor] = s.nome;
+                    if(selSetor) selSetor.innerHTML += `<option value="${s.id_setor}">${s.nome}</option>`;
+                });
+
+                const selResp = document.getElementById('id_responsavel_nome');
+                usuarios.forEach(u => {
+                    usuariosMap[u.id_usuario] = u.nome;
+                    if (user.nivel_acesso === 'Administrador' || u.id_setor === user.id_setor) {
+                        selResp.innerHTML += `<option value="${u.id_usuario}">${u.nome}</option>`;
+                    }
+                });
+
+                if (user.nivel_acesso !== 'Administrador') {
+                    projetos = projetos.filter(p => p.id_setor === user.id_setor);
+                }
+                projetosList = projetos;
+                renderProjetos();
+            } catch(e) { console.error(e); }
+        }
+
+        function renderProjetos() {
+            const tbody = document.querySelector('#table-projetos tbody');
+            tbody.innerHTML = '';
+            
+            if(projetosList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${user.nivel_acesso === 'Administrador' ? 7 : 6}" style="text-align:center;">Nenhum projeto encontrado.</td></tr>`;
+                return;
+            }
+
+            projetosList.forEach(p => {
+                const tarefas = p.tarefas || [];
+                const total = tarefas.length;
+                const concluidas = tarefas.filter(t => t.concluida).length;
+                
+                const hoje = new Date().toISOString().split('T')[0];
+                let contVerde = 0;
+                let contAmarelo = 0;
+                let contVermelho = 0;
+                
+                if(total > 0){
+                    tarefas.forEach(t => {
+                        if (t.concluida) {
+                            if (t.data_conclusao && t.data_fim && t.data_conclusao > t.data_fim) {
+                                contVermelho++;
+                            } else {
+                                contVerde++;
+                            }
+                        } else {
+                            contAmarelo++;
+                        }
+                    });
+                }
+
+                const adminTd = user.nivel_acesso === 'Administrador' ? `<td><span class="status_tag-tag status_tag-encerrado">${setoresMap[p.id_setor] || ''}</span></td>` : '';
+                const colspan = user.nivel_acesso === 'Administrador' ? 7 : 6;
+
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${p.nome}</strong></td>
+                    <td>${formatData(p.data_inicio)} - ${formatData(p.data_fim)}</td>
+                    <td><span class="status_tag-tag ${getStatusClass(p.status_tag)}">${p.status_tag}</span></td>
+                    <td>${p.prioridade}</td>
+                    <td>${usuariosMap[p.id_responsavel] || 'Desconhecido'}</td>
+                    ${adminTd}
+                    <td style="text-align: center;">
+                        <button class="action-btn" style="color: #8ed1f0; margin-right: 0.5rem;" onclick="toggleDetails(${p.id_projeto})"><i class="fa-solid fa-chevron-down fa-lg" id="chevron-${p.id_projeto}"></i></button>
+                        <button class="action-btn" style="color: var(--status_tag-yellow);" onclick="abrirModalTarefas(${p.id_projeto}, '${p.nome.replace(/'/g, "\\'")}')"><i class="fa-solid fa-list-check fa-lg"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                let detRow = document.createElement('tr');
+                detRow.id = `details-row-${p.id_projeto}`;
+                detRow.style.display = 'none';
+                detRow.innerHTML = `
+                    <td colspan="${colspan}" style="padding: 1.5rem; background: rgba(15, 23, 42, 0.25);">
+                        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <div><h4 style="color: #fff;"><i class="fa-solid fa-folder-open" style="color: #8ed1f0;"></i> ${p.nome}</h4></div>
+                                <div style="min-width: 250px; background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                                        <span style="color: #fff;">Progresso</span> <span style="color: #10b981; font-weight: bold;">${concluidas} / ${total}</span>
+                                    </div>
+                                    <div style="width: 100%; background: rgba(255, 255, 255, 0.1); border-radius: 8px; height: 12px; overflow: hidden; margin-bottom: 0.5rem; display: flex;">
+                                        <div style="width: ${total > 0 ? (contVerde/total)*100 : 0}%; background: #10b981; height: 100%; transition: width 0.5s ease-in-out;" title="${contVerde} no prazo"></div>
+                                        <div style="width: ${total > 0 ? (contVermelho/total)*100 : 0}%; background: #ef4444; height: 100%; transition: width 0.5s ease-in-out;" title="${contVermelho} com atraso"></div>
+                                        <div style="width: ${total > 0 ? (contAmarelo/total)*100 : 0}%; background: #eab308; height: 100%; transition: width 0.5s ease-in-out;" title="${contAmarelo} pendentes"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #b9d5e6; text-align: right;">
+                                        ${p.percentual_conclusao ?? 0}% Concluído
+                                    </div>
+                                </div>
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 0.75rem;">Status</th><th>Tarefa</th><th>Responsável</th><th>Fim</th></tr></thead>
+                                <tbody>
+                                    ${tarefas.map(t => {
+                                        let isLate = false;
+                                        if (t.data_conclusao) {
+                                            isLate = t.data_conclusao > t.data_fim;
+                                        } else {
+                                            isLate = hoje > t.data_fim;
+                                        }
+                                        
+                                        let iconHtml = '';
+                                        if (!t.concluida) {
+                                            iconHtml = `<button onclick="toggleTarefaInline(${t.id_tarefa}, true, ${p.id_projeto})" style="background:none; border:none; cursor:pointer;" title="Marcar como Concluída"><i class="fa-regular fa-square" style="color:#657487; font-size:1.1rem;"></i></button>`;
+                                        } else {
+                                            const color = isLate ? '#ef4444' : '#10b981';
+                                            iconHtml = `<button onclick="toggleTarefaInline(${t.id_tarefa}, false, ${p.id_projeto})" style="background:none; border:none; cursor:pointer;" title="${isLate ? 'Concluída com Atraso (Clique para desmarcar)' : 'Concluída no Prazo (Clique para desmarcar)'}"><i class="fa-solid fa-check" style="color:${color}; font-size:1.1rem;"></i></button>`;
+                                        }
+                                        
+                                        return `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <td style="padding: 0.75rem; text-align: center;">${iconHtml}</td>
+                                            <td style="color: #fff; ${t.concluida ? 'text-decoration:line-through; opacity:0.5;' : ''}">${t.nome_tarefa}</td>
+                                            <td><span style="background: #26364a; padding:2px 6px; border-radius:4px; color: #ffffff; font-weight: 500;">${t.responsavel_nome}</span></td>
+                                            <td style="color: #fff;">${formatData(t.data_fim)}</td>
+                                        </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(detRow);
+            });
+            
+            // Reabre as linhas que estavam abertas antes do refresh
+            openProjectRows.forEach(id => {
+                const row = document.getElementById('details-row-' + id);
+                const chevron = document.getElementById('chevron-' + id);
+                if (row && chevron) {
+                    row.style.display = 'table-row';
+                    chevron.className = 'fa-solid fa-chevron-up fa-lg';
+                }
+            });
+        }
+
+        window.toggleDetails = function(id) {
+            const row = document.getElementById('details-row-' + id);
+            const chevron = document.getElementById('chevron-' + id);
+            if (row.style.display === 'none') {
+                row.style.display = 'table-row';
+                chevron.className = 'fa-solid fa-chevron-up fa-lg';
+                openProjectRows.add(id);
+            } else {
+                row.style.display = 'none';
+                chevron.className = 'fa-solid fa-chevron-down fa-lg';
+                openProjectRows.delete(id);
+            }
+        };
+
+        window.toggleTarefaInline = async function(idTarefa, concluida, idProjeto) {
+            let body = { concluida };
+            if (concluida) {
+                body.data_conclusao = new Date().toISOString().split('T')[0];
+            } else {
+                body.data_conclusao = null;
+            }
+            await fetch(`http://${window.location.hostname}:8000/api/v1/tarefas/${idTarefa}/`, { method: 'PATCH', headers: apiHeaders, body: JSON.stringify(body) });
+            // Garantir que a linha deste projeto fique aberta após o init()
+            openProjectRows.add(idProjeto);
+            await init();
+        }
+
+        // Form Projeto
+        document.getElementById('form-projeto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dtIni = document.getElementById('data_inicio').value;
+            const dtFin = document.getElementById('data_fim').value;
+            if (dtFin < dtIni) {
+                mostrarAlerta('A data final não pode ser anterior à data inicial.', true);
+                return;
+            }
+            const body = {
+                nome: document.getElementById('nome').value,
+                data_inicio: dtIni,
+                data_fim: dtFin,
+                status_tag: 'Em andamento',
+                prioridade: document.getElementById('prioridade').value,
+                id_responsavel: parseInt(document.getElementById('id_responsavel_nome').value) || null,
+                id_setor: user.nivel_acesso === 'Administrador' ? (parseInt(document.getElementById('id_setor').value) || null) : user.id_setor
+            };
+            try {
+                const res = await fetch(`http://${window.location.hostname}:8000/api/v1/projetos/`, { method: 'POST', headers: apiHeaders, body: JSON.stringify(body) });
+                if(res.ok) {
+                    mostrarAlerta("Projeto criado com sucesso!");
+                    e.target.reset();
+                    init();
+                }
+            } catch(e) {}
+        });
+
+        // Modais Tarefas
+        window.abrirModalTarefas = function(idProjeto, nomeProjeto) {
+            window.currentProjetoId = idProjeto;
+            document.getElementById('modal-titulo').innerHTML = `<i class="fa-solid fa-project-diagram"></i> Projeto: ${nomeProjeto}`;
+            document.getElementById('modal_id_projeto').value = idProjeto;
+            
+            const tbody = document.getElementById('tabela-tarefas');
+            tbody.innerHTML = '';
+            
+            const p = projetosList.find(x => x.id_projeto === idProjeto);
+            if (!p || !p.tarefas || p.tarefas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #657487; padding: 1.5rem;">Nenhuma tarefa registrada para este projeto.</td></tr>';
+            } else {
+                p.tarefas.forEach(t => {
+                    const status_tagIcon = t.concluida 
+                        ? '<i class="fa-solid fa-square-check" style="color: var(--status_tag-green); font-size: 1.3rem;"></i>' 
+                        : '<i class="fa-regular fa-square" style="color: #657487; font-size: 1.3rem;"></i>';
+                    
+                    const textStyle = t.concluida 
+                        ? 'font-weight: 500; text-decoration: line-through; color: #b9d5e6;' 
+                        : 'font-weight: 500; color: #26364a;';
+                        
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="text-align: center;">
+                                <button onclick="toggleTarefa(${t.id_tarefa}, ${!t.concluida})" style="background: none; border: none; cursor: pointer; padding: 0.25rem; display: inline-flex; align-items: center; justify-content: center;" title="${t.concluida ? 'Marcar como Pendente' : 'Marcar como Concluída'}">
+                                    ${status_tagIcon}
+                                </button>
+                            </td>
+                            <td style="${textStyle}">${t.nome_tarefa}</td>
+                            <td><span style="background: #dce6ec; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #465569;">${t.responsavel_nome}</span></td>
+                            <td>${formatData(t.data_inicio)}</td>
+                            <td>${formatData(t.data_fim)}</td>
+                            <td style="text-align: center;">
+                                <button onclick="excluirTarefa(${t.id_tarefa})" style="background: none; border: none; cursor: pointer; color: #ef4444; padding: 0.25rem;" title="Excluir Tarefa">
+                                    <i class="fa-solid fa-trash-can fa-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('modal-tarefas').classList.add('active');
+        }
+
+        window.fecharModal = function() {
+            document.getElementById('modal-tarefas').classList.remove('active');
+        }
+
+        document.getElementById('form-tarefa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const body = {
+                id_projeto: parseInt(document.getElementById('modal_id_projeto').value),
+                nome_tarefa: document.getElementById('nome_tarefa').value,
+                responsavel_nome: document.getElementById('responsavel_nome_tarefa').value,
+                data_inicio: document.getElementById('data_inicio_tarefa').value,
+                data_final: document.getElementById('data_fim_tarefa').value,
+                concluida: false
+            };
+            await fetch(`http://${window.location.hostname}:8000/api/v1/tarefas/`, { method: 'POST', headers: apiHeaders, body: JSON.stringify(body) });
+            e.target.reset();
+            await init(); // Recarregar e atualizar state
+            
+            // Reabrir modal para o msm projeto
+            const p = projetosList.find(x => x.id_projeto === window.currentProjetoId);
+            abrirModalTarefas(p.id_projeto, p.nome);
+        });
+
+        window.toggleTarefa = async function(id, concluida) {
+            let body = { concluida };
+            if (concluida) {
+                body.data_conclusao = new Date().toISOString().split('T')[0];
+            } else {
+                body.data_conclusao = null;
+            }
+            await fetch(`http://${window.location.hostname}:8000/api/v1/tarefas/${id}/`, { method: 'PATCH', headers: apiHeaders, body: JSON.stringify(body) });
+            await init();
+            const p = projetosList.find(x => x.id_projeto === window.currentProjetoId);
+            abrirModalTarefas(p.id_projeto, p.nome);
+        }
+
+        window.excluirTarefa = async function(id) {
+            if(confirm('Tem certeza que deseja excluir esta tarefa?')){
+                await fetch(`http://${window.location.hostname}:8000/api/v1/tarefas/${id}/`, { method: 'DELETE', headers: apiHeaders });
+                await init();
+                const p = projetosList.find(x => x.id_projeto === window.currentProjetoId);
+                abrirModalTarefas(p.id_projeto, p.nome);
+            }
+        }
+
+        function mostrarAlerta(msg) {
+            const box = document.getElementById('alert-box');
+            box.textContent = msg;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

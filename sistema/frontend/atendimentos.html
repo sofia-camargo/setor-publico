@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atendimentos · SIGDEI</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body { background:#f3f6fa; color:#163b59; font-family:system-ui,sans-serif; }
+    main { max-width:850px; margin:auto; padding:30px 24px 60px; }
+    h1 { margin:0 0 8px; }
+    p { line-height:1.5; }
+    form { background:white; border:1px solid #d7e1e9; border-radius:12px; padding:20px; margin:20px 0; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+    label { display:block; font-weight:650; }
+    input,select { display:block; width:100%; box-sizing:border-box; margin-top:6px; padding:9px; border:1px solid #b6c9d6; border-radius:8px; font:inherit; }
+    button { margin-top:16px; background:#0c776b; color:white; border:0; border-radius:8px; padding:10px 18px; font:inherit; font-weight:700; cursor:pointer; }
+    button:disabled { opacity:.55; }
+    [hidden] { display:none!important; }
+    .message { min-height:1.5em; margin:12px 0; }
+  </style>
+  <script src="assets/js/atendimentos.js" defer></script>
+</head>
+<body>
+  <main>
+    <h1>Registrar atendimento</h1>
+    <p>Busque a empresa pelo CNPJ. O mesmo cadastro é usado pelos setores para calcular IC-01 a IC-04.</p>
+    <form id="company-form">
+      <h2>Empresa</h2>
+      <div class="grid"><label>CNPJ<input id="cnpj" required maxlength="18" autocomplete="off" placeholder="CNPJ numérico ou alfanumérico"></label></div>
+      <button type="button" id="company-search">Buscar CNPJ</button>
+      <div id="company-found" class="message" role="status"></div>
+      <div id="company-new" hidden>
+        <div class="grid">
+          <label>Razão social<input id="razao-social" maxlength="255"></label>
+          <label>Ramo de atividade<input id="ramo" maxlength="100"></label>
+          <label>Bairro<input id="bairro" maxlength="100"></label>
+        </div>
+        <button type="submit">Cadastrar empresa</button>
+      </div>
+    </form>
+    <form id="attendance-form">
+      <h2>Atendimento</h2>
+      <p id="attendance-company">Busque ou cadastre a empresa antes de salvar.</p>
+      <div class="grid">
+        <label id="sector-wrap" hidden>Setor<select id="sector"></select></label>
+        <label>Data do atendimento<input id="attendance-date" type="date" required></label>
+        <label>Tipo<select id="attendance-type" required>
+          <option value="SEBRAE_ORIENTACAO">Orientação SEBRAE</option>
+          <option value="BP_LIBERACAO">Crédito liberado</option>
+          <option value="PAT_VAGA">Vaga captada no PAT</option>
+          <option value="OUTRO">Outro atendimento</option>
+        </select></label>
+        <label>Desfecho<input id="outcome" required maxlength="100" placeholder="Ex.: Resolvido"></label>
+        <label class="credit-fields" hidden>Crédito liberado (R$)<input id="credit" type="number" min="0.01" step="0.01"></label>
+        <label class="credit-fields" hidden>Data da liberação<input id="released" type="date"></label>
+        <label class="vacancy-fields" hidden>Número de vagas<input id="vacancies" type="number" min="1" step="1"></label>
+        <label class="vacancy-fields" hidden>Data de abertura<input id="opened" type="date"></label>
+      </div>
+      <button id="save-attendance" type="submit" disabled>Salvar atendimento</button>
+      <p id="attendance-status" class="message" role="status"></p>
+    </form>
+  </main>
+</body>
+</html>

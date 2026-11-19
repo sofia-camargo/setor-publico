@@ -1,0 +1,17 @@
+{
+  "files": {
+    "sistema/docs/Cronograma_SetorPúblico_PI_IV_v01.pdf": "48c429da2a09b0682050f2bb2f39b7c8be75bf2abb4d01248f8e078fedc77757",
+    "sistema/docs/EAP/Dicionario_EAP_SetorPúblico_PI_IV_v01.pdf": "45d7f236f56e00885ca9dfb6147a25411ac123538f4364fbf201687943d4296c",
+    "sistema/docs/EAP/Dicionário_EAP_SetorPúblico_PI_IV_v02.pdf": "005ef2260c0d93b08acb011ef07bd7071150e6d7880ee8e4689b1d5c48ff8b2c",
+    "sistema/docs/Matriz_Raci_SetorPúblico_PI_IV_v02.pdf": "9b012f8eed347b8180565fe793a54eadb08b3921187ee47003a8cc41fbc32189",
+    "sistema/docs/PDM_Setor_Público_PI_IV.pdf": "5df62f382c54f44cda1447957817e400bcf9072bab8ddbd5e7f2fd572c48dd56",
+    "sistema/docs/TAP_SetorPúblico_PI-IV_v03.pdf": "1c3c62ebf96d2a3eb61588825ddd0a8ff7adc1c978231aefbee533ac9e4f5b90",
+    "sistema/docs/TAP_SetorPúblico_PI_IV_v02.pdf": "45e68578132456bbd7eef483c9b0c460ff3237b57b48e1e3b1bcec43afc30df6",
+    "sistema/README.md": "4a233d5cd92eaf557c987c0ac87217a13dd3b7a5b632c1137a4769f4c94c500d"
+  },
+  "settings": {
+    "ollama_url": "http://127.0.0.1:11434",
+    "chat_model": "llama3.2:3b",
+    "embed_model": "nomic-embed-text"
+  }
+}

@@ -1,0 +1,470 @@
+{
+    "info": {
+        "name": "SIGDEI API",
+        "description": "Coleção do Postman com todas as requisições da plataforma SIGDEI",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api/v1",
+            "type": "string"
+        },
+        {
+            "key": "jwt_token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Autenticação",
+            "item": [
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if(jsonData.access) {",
+                                    "    pm.collectionVariables.set(\"jwt_token\", jsonData.access);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"matricula\": \"admin\",\n    \"senha\": \"admin123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/login/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "login",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Usuários",
+            "item": [
+                {
+                    "name": "Listar Usuários",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Criar Usuário",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nome\": \"João da Silva\",\n    \"matricula\": \"12345\",\n    \"senha_hash\": \"senha123\",\n    \"nivel_acesso\": \"Usuário\",\n    \"id_setor\": 1,\n    \"atividade\": \"Atendente\",\n    \"funcao\": \"Atendente\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Setores",
+            "item": [
+                {
+                    "name": "Listar Setores",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/setores/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "setores",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Criar Setor",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nome\": \"Departamento de TI\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/setores/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "setores",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Projetos",
+            "item": [
+                {
+                    "name": "Listar Projetos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/projetos/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "projetos",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Criar Projeto",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nome\": \"Novo Projeto Postman\",\n    \"data_inicio\": \"2026-06-01\",\n    \"data_fim\": \"2026-12-31\",\n    \"status_tag\": \"Em andamento\",\n    \"prioridade\": \"Alta\",\n    \"id_responsavel\": 1,\n    \"id_setor\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/projetos/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "projetos",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tarefas",
+            "item": [
+                {
+                    "name": "Criar Tarefa",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id_projeto\": 1,\n    \"nome_tarefa\": \"Desenvolver API\",\n    \"responsavel_nome\": \"Carlos\",\n    \"data_inicio\": \"2026-06-02\",\n    \"data_final\": \"2026-06-15\",\n    \"concluida\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tarefas/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tarefas",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Atualizar Status Tarefa (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"concluida\": true,\n    \"data_conclusao\": \"2026-06-10\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tarefas/1/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tarefas",
+                                "1",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Indicadores & Atividades",
+            "item": [
+                {
+                    "name": "Listar Indicadores",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/indicadores/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "indicadores",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Criar Indicador Base",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nome\": \"Atendimentos Semanais\",\n    \"tipo_dado\": \"Quantidade\",\n    \"id_setor\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/indicadores/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "indicadores",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Listar Atividades (Lançamentos)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/atividades/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "atividades",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Lançar Atividade (Valor)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id_indicador\": 1,\n    \"id_usuario\": 1,\n    \"valor\": 15.5,\n    \"data_cadastro\": \"2026-06-02\",\n    \"tipo_registro\": \"lancamento\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/atividades/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "atividades",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Ofícios",
+            "item": [
+                {
+                    "name": "Listar Ofícios",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/oficios/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oficios",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Criar Ofício",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{jwt_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"assunto\": \"Solicitação de materiais de escritório\",\n    \"local_fisico\": \"Gaveta B\",\n    \"id_setor\": 1,\n    \"id_usuario\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/oficios/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "oficios",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

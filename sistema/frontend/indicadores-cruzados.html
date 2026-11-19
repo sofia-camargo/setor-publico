@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Indicadores cruzados | SIGDEI</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/indicadores-cruzados.css">
+  <script src="assets/js/indicadores-cruzados.js" defer></script>
+</head>
+<body class="cross-page">
+  <main class="cross-shell">
+    <header class="cross-hero">
+      <div>
+        <span class="cross-kicker">Painel gerencial</span>
+        <h1>Indicadores cruzados</h1>
+        <p>Acompanhe a jornada das empresas entre SEBRAE Aqui, Banco do Povo e PAT.</p>
+      </div>
+      <button id="cross-export" class="cross-export" type="button"><i class="fa-regular fa-file-pdf"></i> Exportar PDF</button>
+    </header>
+
+    <section class="cross-filters" aria-label="Filtros do painel">
+      <label>Data inicial<input id="cross-start" type="date" required></label>
+      <label>Data final<input id="cross-end" type="date" required></label>
+      <button id="cross-apply" type="button"><i class="fa-solid fa-filter"></i> Aplicar período</button>
+      <span id="cross-status" role="status">Carregando indicadores…</span>
+    </section>
+
+    <section id="cross-cards" class="cross-cards" aria-label="Resumo dos indicadores"></section>
+
+    <section class="cross-grid">
+      <article class="cross-panel cross-chart-panel">
+        <div class="cross-panel-heading">
+          <div><span class="cross-kicker">Visão consolidada</span><h2>Impacto entre setores</h2></div>
+          <span id="cross-period-label" class="cross-period"></span>
+        </div>
+        <div id="cross-charts" class="cross-charts"></div>
+      </article>
+
+      <article class="cross-panel cross-story">
+        <span class="cross-kicker">Leitura do funil</span>
+        <h2>Da orientação ao emprego</h2>
+        <div class="cross-flow" aria-label="Fluxo SEBRAE, Banco do Povo e PAT">
+          <div><span>1</span><strong>SEBRAE Aqui</strong><small>orientação empresarial</small></div>
+          <i class="fa-solid fa-arrow-right"></i>
+          <div><span>2</span><strong>Banco do Povo</strong><small>crédito liberado</small></div>
+          <i class="fa-solid fa-arrow-right"></i>
+          <div><span>3</span><strong>PAT</strong><small>emprego e vagas</small></div>
+        </div>
+        <p>Os resultados são calculados automaticamente a partir dos atendimentos vinculados ao mesmo CNPJ e respeitam a ordem cronológica da jornada.</p>
+      </article>
+    </section>
+
+    <section class="cross-panel cross-table-panel">
+      <div class="cross-panel-heading">
+        <div><span class="cross-kicker">Detalhamento e auditoria</span><h2>Como cada indicador é calculado</h2></div>
+      </div>
+      <div class="cross-table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Indicador</th><th>Resultado</th><th>Base do cálculo</th><th>Setores</th></tr></thead>
+          <tbody id="cross-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="cross-denied" class="cross-denied" hidden>
+      <i class="fa-solid fa-lock"></i><h2>Visão estratégica necessária</h2>
+      <p>Este painel é restrito aos usuários que receberam permissão individual para consultar indicadores cruzados.</p>
+    </div>
+  </main>
+</body>
+</html>
